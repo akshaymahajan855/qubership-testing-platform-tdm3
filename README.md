@@ -30,7 +30,7 @@ Prerequisites
 - Docker installed local
 - VM options: -DLOCAL_DOCKER_START=true
 
-## How to start development of front end
+## How to start development of frontend
 
 1. Download and install [Node.js](https://nodejs.org/en/download/)
 2. Install node modules from package.json with `npm i`
@@ -39,7 +39,7 @@ Run `npm start` for a dev server. Navigate to `http://localhost:4200/`. The app 
 
 Run `npm run hmr` for a dev server with hot module replacement. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files but won't reload the page.
 
-Run `npm run svg` for injecting svg bundle from svg-icons folder to index.html.
+Run `npm run svg` for injecting SVG bundle from svg-icons folder to index.html.
 
 Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
 
@@ -51,7 +51,7 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 Run `ng e2e` to execute the end-to-end tests via [Protractor](https://www.protractortest.org/).
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/main/README.md).
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI readme](https://github.com/angular/angular-cli/blob/main/README.md).
 
 ## How to run UI with backend
 
@@ -76,4 +76,4 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 5. Navigate to the openshift
 6. Navigate to the "Applications" -> "Routes"
 7. Find a link to the tool with the specified project name
-8. Check the tool - open the url from the column "Hostname"
+8. Check the tool - open the URL from the column "Hostname"
