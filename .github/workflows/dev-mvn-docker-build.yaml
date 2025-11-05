@@ -20,6 +20,10 @@ on:
       - "README.md"
       - ".github/**"
   workflow_dispatch: {}
+  pull_request:
+    branches: [main]
+    types:
+      [opened, reopened, synchronize]
 
 permissions:
   contents: read
@@ -33,7 +37,7 @@ jobs:
     uses: ./.github/workflows/re-maven-snapshot-deploy.yaml
     with:
       java-version: "21"
-      additional-mvn-args: "-DskipTests=true"
+      additional-mvn-args: ""
       target-store: "maven-central"
     secrets:
       maven-username: ${{ secrets.MAVEN_USER }}
@@ -47,35 +51,35 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Metadata
         id: metadata
-        uses: netcracker/qubership-workflow-hub/actions/metadata-action@main
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
       - name: Build and Publish Docker Image For Environments
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
         with:
           ref: ${{ github.ref }}
           dry-run: false
           tags: ${{steps.metadata.outputs.result}}
           download-artifact: true
-          custom-image-name: qubership-testing-platform-mia
-          download-artifact-path: build-context/qubership-testing-platform-mia/qubership-testing-platform-mia
-          component: '[{"name": "qubership-testing-platform-mia", "file": "./Dockerfile", "context": "."}]'
+          custom-image-name: qubership-testing-platform-tdm3
+          download-artifact-path: build-context
+          component: '[{"name": "qubership-testing-platform-tdm3", "file": "./Dockerfile", "context": "."}]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish Docker Image For Transfer
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
         with:
           ref: ${{ github.ref }}
           dry-run: false
           tags: ${{steps.metadata.outputs.result}}
           download-artifact: false
-          custom-image-name: qubership-testing-platform-mia-transfer
-          component: '[{"name": "qubership-testing-platform-mia-transfer", "file": "docker-transfer/Dockerfile", "context": "."}]'
+          custom-image-name: qubership-testing-platform-tdm3-transfer
+          component: '[{"name": "qubership-testing-platform-tdm3-transfer", "file": "docker-transfer/Dockerfile", "context": "."}]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

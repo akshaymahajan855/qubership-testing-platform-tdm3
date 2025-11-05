@@ -48,7 +48,7 @@ on:
       mvn-args:
         description: 'Additional maven arguments to pass (e.g. -DskipTests=true -Dmaven.javadoc.skip=true)'
         required: false
-        default: '-DskipTests=true'
+        default: ''
         type: string
       build-docker:
         description: 'Build Docker image'
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build and Publish current SNAPSHOT (dry run)"
-        uses: netcracker/qubership-workflow-hub/actions/maven-release@v1.0.1
+        uses: netcracker/qubership-workflow-hub/actions/maven-release@de43c4115d6d3b1547060e7ef2a137aa9ab60fc1 #v1.0.5
         with:
           java-version: "21"
           version-type: ${{ github.event.inputs.version-type }}
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Prepare app token"
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 #v2.1.4
         id: app-token
         with:
           app-id: ${{ vars.GH_BUMP_VERSION_APP_ID }}
@@ -96,7 +96,7 @@ jobs:
       - name: "Build and Publish"
         id: build-and-publish
 
-        uses: netcracker/qubership-workflow-hub/actions/maven-release@main
+        uses: netcracker/qubership-workflow-hub/actions/maven-release@de43c4115d6d3b1547060e7ef2a137aa9ab60fc1 #v1.0.5
         with:
           java-version: "21"
           version-type: ${{ github.event.inputs.version-type }}
@@ -113,10 +113,10 @@ jobs:
           dry-run: 'false'
 
       - name: Upload all Maven target directories
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: qubership-testing-platform-mia
-          path: '**/target'
+          name: qubership-testing-platform-tdm3
+          path: '${{ github.event.repository.name }}/**/target'
 
   load-docker-build-components:
     needs: [deploy]
@@ -126,7 +126,9 @@ jobs:
       platforms: ${{ steps.load_component.outputs.platforms }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Load Docker Configuration
         id: load_component
@@ -166,11 +168,12 @@ jobs:
     steps:
       - name: "Docker Build"
         id: docker_build
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
         with:
           ref: v${{ needs.deploy.outputs.release-version }}
           download-artifact: true
           download-artifact-path: build-context
+          download-artifact-merge-multiple: 'true'
           dry-run: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
@@ -180,7 +183,7 @@ jobs:
   github-release:
     needs: [deploy]
     if: ${{ needs.deploy.result == 'success' }}
-    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@v1.0.1
+    uses: netcracker/qubership-workflow-hub/.github/workflows/release-drafter.yml@de43c4115d6d3b1547060e7ef2a137aa9ab60fc1 #v1.0.5
     with:
       version: ${{ needs.deploy.outputs.release-version }}
       publish: true
