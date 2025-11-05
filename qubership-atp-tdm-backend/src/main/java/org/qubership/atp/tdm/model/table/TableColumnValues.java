@@ -40,7 +40,7 @@ public class TableColumnValues {
     @Column(name = "table_title")
     private String tableTitle;
 
-    @Column(name = "values")
+    @Column(name = "vals")
     @Convert(converter = TableColumnValuesConverter.class)
     private List<String> values;
 }

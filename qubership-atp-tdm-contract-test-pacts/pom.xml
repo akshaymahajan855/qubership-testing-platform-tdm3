@@ -147,14 +147,14 @@
         <dependency>
             <groupId>org.qubership.atp.tdm3</groupId>
             <artifactId>qubership-atp-tdm-env-configurator</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.qubership.atp.tdm3</groupId>
             <artifactId>qubership-atp-tdm-backend</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

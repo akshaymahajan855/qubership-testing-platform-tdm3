@@ -50,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 @EnableOauth2FeignClientInterceptor
 @SpringBootApplication(scanBasePackages = {
         "org.qubership.atp.tdm",
+        "org.qubership.atp.tdm.env.configurator",
         "org.qubership.atp.common.probes.configuration",
         "org.qubership.atp.common",
         "org.qubership.atp.integration.configuration"
