@@ -26,7 +26,7 @@ Differences of TDM3 Service from TDM Service are the following:
 Just run Main#main with args from step above
 
 ## How to start Tests with Docker
-Prerequisites 
+Prerequisites
 - Docker installed local
 - VM options: -DLOCAL_DOCKER_START=true
 
@@ -55,18 +55,18 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 
 ## How to run UI with backend
 
-1. Build project first: build by maven "clean" and "package", run as backend on port 8080. 
+1. Build project first: build by maven "clean" and "package", run as backend on port 8080.
 
 ## How to deploy tool
 
 1. Navigate to the builder job
 2. Click "Build with Parameters"
-3. Fill requires parameters:
+3. Fill required parameters:
 
     * CLOUD_URL = **dev-atp-cloud.com:8443**
     * OPENSHIFT_WORKSPACE = **dev1**
-    * OPENSHIFT_USER =	**{domain_login}**
-    * OPENSHIFT_PASSWORD =	**{domain_password}**
+    * OPENSHIFT_USER = **{domain_login}**
+    * OPENSHIFT_PASSWORD = **{domain_password}**
     * ARTIFACT_DESCRIPTOR_GROUP_ID = **org.qubership.deploy.product**
     * ARTIFACT_DESCRIPTOR_ARTIFACT_ID = **prod.ta_atp-tdm**
     * ARTIFACT_DESCRIPTOR_VERSION = **master_20191112-002747**
