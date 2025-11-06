@@ -152,7 +152,7 @@
                 <artifactId>maven-scm-plugin</artifactId>
                 <version>1.9.5</version>
                 <configuration>
-                    <tag>atp-tdm3-${project.version}</tag>
+                    <tag>atp3-tdm-be-${project.version}</tag>
                 </configuration>
             </plugin>
         </plugins>
