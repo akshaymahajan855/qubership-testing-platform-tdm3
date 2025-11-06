@@ -1,23 +1,5 @@
 #!/bin/sh
 
-cat >./web/assets/routes.json <<EOF
-{
-  "loginRequired": false,
-  "idp": {
-    "realm": "${KEYCLOAK_REALM:?}",
-    "url": "${KEYCLOAK_AUTH_URL%/*}",
-    "loginEndPoint": "/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/auth",
-    "logoutEndPoint": "/auth/realms/${KEYCLOAK_REALM}/protocol/openid-connect/logout"
-  },
-  "services": [
-    {
-      "name": "tdm",
-      "url": "${IDENTITY_PROVIDER_URL:?}"
-    }
-  ]
-}
-EOF
-
 if [ "${ATP_INTERNAL_GATEWAY_ENABLED:-false}" = "true" ]; then
   echo "Internal gateway integration is enabled."
   FEIGN_ATP_MAILSENDER_NAME=${FEIGN_ATP_INTERNAL_GATEWAY_NAME}
