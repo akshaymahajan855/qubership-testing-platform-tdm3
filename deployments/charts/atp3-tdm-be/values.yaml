@@ -6,7 +6,7 @@ ATP_CRYPTO_PRIVATE_KEY: ""
 # Set to ATP2 to enable Prometheus scrapping
 SERVICE_TYPE: "ATP3"
 # Spring profile for security
-SPRING_PROFILES: "disable-security"
+ACTIVE_PROFILES_SPRING: "disable-security"
 # Which docker image should be used to deploy
 DOCKER_TAG: "artifactory-service-address/path-to-image"
 # Encyption option. One of - dev (default, encrypt inside app); - secrets (encrypt keys in Openshift secrets)
