@@ -39,6 +39,10 @@ public interface EnvironmentsService {
 
     List<LazyEnvironment> getLazyEnvironments(@Nonnull UUID projectId);
 
+    List<LazyEnvironment> getLazyEnvironmentsFromCache(@Nonnull UUID projectId);
+
+    List<LazyEnvironment> getLazyEnvironmentsRefresh(@Nonnull UUID projectId);
+
     LazyEnvironment getLazyEnvironment(@Nonnull UUID environmentId);
 
     String getEnvNameById(@Nonnull UUID environmentId);

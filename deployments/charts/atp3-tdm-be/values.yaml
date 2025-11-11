@@ -76,6 +76,8 @@ atp3tdm:
   gitEnvironmentsTopologyParametersPath: ''
   gitEnvironmentsParametersPath: ''
   gitEnvironmentsCredentialsPath: ''
+  gitEnvironmentsDeploymentParametersPath: '/effective-set/deployment/atp/atp3-playwright-runner/values/deployment-parameters.yaml'
+  gitEnvironmentsDeploymentCredentialsPath: '/effective-set/deployment/atp/atp3-playwright-runner/values/credentials.yaml'
   atpInternalGatewayEnabled: "false"
   # Api url for routing by eureka
   atpServicePath: "/api/atp-tdm/v1/**"

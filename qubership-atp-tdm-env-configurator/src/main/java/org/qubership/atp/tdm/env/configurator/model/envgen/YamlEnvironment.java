@@ -16,6 +16,7 @@
 
 package org.qubership.atp.tdm.env.configurator.model.envgen;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -49,6 +50,10 @@ public class YamlEnvironment {
                 .forEach(yamlSystem -> yamlSystem.setId(
                         UUID.nameUUIDFromBytes(String.format("%s/%s", this.name, yamlSystem.getName()).getBytes())));
         setConnectionId();
+    }
+
+    public List<YamlSystem> getYamlSystems() {
+        return yamlSystems == null ? new ArrayList<>() : yamlSystems;
     }
 
     private void setConnectionId() {
@@ -104,11 +109,14 @@ public class YamlEnvironment {
     }
 
     public YamlSystem getSystemById(UUID id) {
-        return yamlSystems
-                .stream()
-                .filter(yamlSystem -> yamlSystem.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+        if (yamlSystems != null) {
+            return yamlSystems
+                    .stream()
+                    .filter(yamlSystem -> yamlSystem.getId().equals(id))
+                    .findFirst()
+                    .orElse(null);
+        }
+        return null;
     }
 
     public YamlSystem getSystemByName(String name) {

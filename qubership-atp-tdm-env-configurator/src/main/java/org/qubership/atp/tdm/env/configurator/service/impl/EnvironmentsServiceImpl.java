@@ -156,17 +156,46 @@ public class EnvironmentsServiceImpl implements EnvironmentsService {
      * Get lazy environments by project ID - with systems.
      */
     @Override
-    @Cacheable(value = CacheNames.TDM_LAZY_ENVIRONMENTS_CACHE)
+//    @Cacheable(value = CacheNames.TDM_LAZY_ENVIRONMENTS_CACHE)
     public List<LazyEnvironment> getLazyEnvironments(@Nonnull UUID projectId) {
         log.info("Loading lazy environments by project id: [{}]", projectId);
         List<LazyEnvironment> lazyEnvironments;
         try {
-            lazyEnvironments = gitService.getLazyEnvironments(projectId);
+            lazyEnvironments = gitService.getLazyEnvironmentsFromCache(projectId);
+            if (lazyEnvironments.isEmpty()) {
+                // If cache is empty, fallback to Git
+                log.info("No cached environments found, loading from Git for project: {}", projectId);
+                lazyEnvironments = gitService.getLazyEnvironments(projectId);
+            } else {
+                log.info("Using cached environments for project: {}", projectId);
+            }
         } catch (Exception e) {
             log.error(format(TdmEnvConvertLazyEnvironmentsException.DEFAULT_MESSAGE, projectId), e);
             throw new TdmEnvConvertLazyEnvironmentsException(projectId.toString());
         }
         log.info("Lazy environments successfully loaded.");
+        return lazyEnvironments;
+    }
+
+    /**
+     * Get lazy environments by project ID - from cache only.
+     */
+    @Override
+    public List<LazyEnvironment> getLazyEnvironmentsFromCache(@Nonnull UUID projectId) {
+        log.info("Getting lazy environments from cache by project id: [{}]", projectId);
+        List<LazyEnvironment> lazyEnvironments = gitService.getLazyEnvironmentsFromCache(projectId);
+        log.info("Retrieved {} cached environments for project: {}", lazyEnvironments.size(), projectId);
+        return lazyEnvironments;
+    }
+
+    /**
+     * Get lazy environments by project ID - refresh without cache.
+     */
+    @Override
+    public List<LazyEnvironment> getLazyEnvironmentsRefresh(@Nonnull UUID projectId) {
+        log.info("Refreshing lazy environments by project id: [{}]", projectId);
+        List<LazyEnvironment> lazyEnvironments = gitService.getLazyEnvironmentsRefresh(projectId);
+        log.info("Lazy environments refresh completed. Found {} environments", lazyEnvironments.size());
         return lazyEnvironments;
     }
 

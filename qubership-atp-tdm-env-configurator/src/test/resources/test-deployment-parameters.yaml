@@ -1,0 +1,42 @@
+APPLICATION_NAME: test-application
+ATP_ENVGENE_CONFIGURATION: &id001
+  systems:
+  - test-system-1:
+      connections:
+      - HTTP:
+          url: https://test-system-1.example.com
+          login: testuser1
+          password: testpass1
+          timeout: 30000
+      - DB:
+          host: db1.example.com
+          port: 5432
+          database: testdb1
+          username: dbuser1
+          password: dbpass1
+  - test-system-2:
+      connections:
+      - HTTP:
+          url: https://test-system-2.example.com
+          login: testuser2
+          password: testpass2
+          timeout: 60000
+      - "JMS Asynchronous":
+          broker_url: tcp://mq.example.com:61616
+          queue_name: test.queue
+          username: mquser
+          password: mqpass
+  - test-system-3:
+      connections:
+      - "REST Synchronous":
+          base_url: https://api.example.com/v1
+          api_key: test-api-key-123
+          timeout: 45000
+      - "File over FTP":
+          host: ftp.example.com
+          port: 21
+          username: ftpuser
+          password: ftppass
+          passive_mode: true
+global: *id001
+test-application: *id001

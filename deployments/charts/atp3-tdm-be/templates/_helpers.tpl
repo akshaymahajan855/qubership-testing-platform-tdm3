@@ -97,6 +97,8 @@ GIT_ENVIRONMENTS_PROJECT_PATH: "{{ .Values.atp3tdm.gitEnvironmentsProjectPath }}
 GIT_ENVIRONMENTS_TOPOLOGY_PARAMETERS_PATH: "{{ .Values.atp3tdm.gitEnvironmentsTopologyParametersPath }}"
 GIT_ENVIRONMENTS_PARAMETERS_PATH: "{{ .Values.atp3tdm.gitEnvironmentsParametersPath }}"
 GIT_ENVIRONMENTS_CREDENTIALS_PATH: "{{ .Values.atp3tdm.gitEnvironmentsCredentialsPath }}"
+GIT_ENVIRONMENTS_DEPLOYMENT_PARAMETERS_PATH: "{{ .Values.atp3tdm.gitEnvironmentsDeploymentParametersPath }}"
+GIT_ENVIRONMENTS_DEPLOYMENT_CREDENTIALS_PATH: "{{ .Values.atp3tdm.gitEnvironmentsDeploymentCredentialsPath }}"
 
 IDENTITY_PROVIDER_URL: "{{ default .Values.atp3tdm.identityProviderUrl .Values.ATP_TDM_URL }}"
 JAVA_OPTIONS: "{{ if .Values.atp3tdm.heapDumpEnabled }}-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp/diagnostic{{ end }} -Djdbc.Url=jdbc:h2:file:./{{ .Values.atp3tdm.h2DbAddr }}/{{ include "tdmbe.env.default" (dict "ctx" . "val" .Values.atp3tdm.tdmDb "def" .Values.SERVICE_NAME ) }};{{ .Values.atp3tdm.h2DbProperty }} -Dcom.sun.management.jmxremote={{ .Values.atp3tdm.jmxEnable }} -Dcom.sun.management.jmxremote.port={{ .Values.atp3tdm.jmxPort }} -Dcom.sun.management.jmxremote.rmi.port={{ .Values.atp3tdm.jmxRmiPort }} -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false {{ .Values.MEM_ARGS }}"

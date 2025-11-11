@@ -25,7 +25,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface TableColumnValuesRepository extends JpaRepository<TableColumnValues,String> {
+public interface TableColumnValuesRepository extends JpaRepository<TableColumnValues, String> {
     List<TableColumnValues> findTableColumnValuesByTableNameIn(List<String> tableList);
 
     @Transactional

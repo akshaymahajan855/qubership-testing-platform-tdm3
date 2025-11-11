@@ -176,7 +176,7 @@ public class DataUtils {
      */
     public static void checkQuery(String query) {
         if (query != null) {
-            String[] errorWord = {"truncate ", "drop ", "delete ", "update ", "alter "};
+            String[] errorWord = {"truncate ", "drop ", "delete "};
             if (Arrays.stream(errorWord).anyMatch(word -> query.toLowerCase().contains(word.toLowerCase()))) {
                 log.error(TdmDbCheckQueryException.DEFAULT_MESSAGE);
                 throw new TdmDbCheckQueryException();

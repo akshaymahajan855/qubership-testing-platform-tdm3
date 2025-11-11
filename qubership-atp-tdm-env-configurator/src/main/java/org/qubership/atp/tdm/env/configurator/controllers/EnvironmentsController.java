@@ -55,6 +55,13 @@ public class EnvironmentsController /* implements EnvironmentsControllerApi */ {
         return service.getLazyEnvironments(projectId);
     }
 
+    @AuditAction(auditAction = "Refresh lazy environments by projectId {{#projectId}}")
+    @GetMapping("/projects/{projectId}/environments/lazy/refresh")
+    @PreAuthorize("@entityAccess.checkAccess(#projectId, 'READ')")
+    public List<LazyEnvironment> getLazyEnvironmentsRefresh(@PathVariable UUID projectId) {
+        return service.getLazyEnvironmentsRefresh(projectId);
+    }
+
     @AuditAction(auditAction = "Get lazy system by environmentId {{#environmentId}}")
     @GetMapping("/environments/{environmentId}/systems/lazy")
     public List<LazySystem> getLazySystems(@PathVariable UUID environmentId) {

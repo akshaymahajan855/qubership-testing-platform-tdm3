@@ -77,3 +77,76 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 6. Navigate to the "Applications" -> "Routes"
 7. Find a link to the tool with the specified project name
 8. Check the tool - open the URL from the column "Hostname"
+
+## Deploy parameters
+
+The following parameters are passed to `application.properties` during deployment:
+
+| Parameter | Type | Mandatory | Default value | Description |
+|-----------|------|-----------|---------------|-------------|
+| `SERVICE_NAME` | `string` | `yes` | `"atp3-tdm-be"` | Deployment Config/Service name. |
+| `LOG_LEVEL` | `string` | `no` | `"INFO"` | Logging level for the application. |
+| `SPRING_PROFILES` | `string` | `no` | `"disable-security"` | Spring profile for security configuration. |
+| `GIT_URL` | `string` | `yes` | `""` | Git repository base URL (e.g., https://git.example.com). |
+| `GIT_TOKEN` | `string` | `yes` | `""` | Access token for private Git repositories. |
+| `GIT_ENVIRONMENTS_REF` | `string` | `no` | `"master"` | Git branch or tag reference for environments configuration. |
+| `GIT_ENVIRONMENTS_PROJECT_PATH` | `string` | `yes` | `""` | Path to the environments project in Git repository. |
+| `GIT_ENVIRONMENTS_TOPOLOGY_PARAMETERS_PATH` | `string` | `no` | `""` | Path to topology parameters file in Git repository. |
+| `GIT_ENVIRONMENTS_PARAMETERS_PATH` | `string` | `no` | `"effective-set/pipeline/qtp-v1.0.schema-parameters.yaml"` | Path to parameters file in Git repository. |
+| `GIT_ENVIRONMENTS_CREDENTIALS_PATH` | `string` | `no` | `"effective-set/pipeline/qtp-v1.0.schema-credentials.yaml"` | Path to credentials file in Git repository. |
+| `GIT_ENVIRONMENTS_DEPLOYMENT_PARAMETERS_PATH` | `string` | `no` | `"/effective-set/deployment/atp/atp3-playwright-runner/values/deployment-parameters.yaml"` | Path to deployment parameters file in Git repository. |
+| `GIT_ENVIRONMENTS_DEPLOYMENT_CREDENTIALS_PATH` | `string` | `no` | `"/effective-set/deployment/atp/atp3-playwright-runner/values/credentials.yaml"` | Path to deployment credentials file in Git repository. |
+| `PROJECTS_INFO` | `json` | `no` | `{}` | JSON object mapping project IDs to project names. |
+| `KEYCLOAK_ENABLED` | `boolean` | `no` | `false` | Enable or disable Keycloak authentication. |
+| `KEYCLOAK_AUTH_URL` | `string` | `no` | `""` | Keycloak authentication server URL. |
+| `KEYCLOAK_REALM` | `string` | `no` | `"atp3"` | Keycloak realm name. |
+| `SERVICE_REGISTRY_URL` | `string` | `no` | `""` | Eureka service registry URL. |
+| `EUREKA_CLIENT_ENABLED` | `boolean` | `no` | `false` | Enable or disable Eureka client. |
+| `MAIL_SENDER_ENABLE` | `boolean` | `no` | `true` | Enable or disable mail sender functionality. |
+| `MAIL_SENDER_URL` | `string` | `no` | `""` | Mail sender service URL. |
+| `FROM_EMAIL_ADDRESS` | `string` | `no` | `"example@example.com"` | Sender email address for notifications. |
+| `ENVIRONMENTS_SPRING_CACHE_TYPE` | `string` | `no` | `"GENERIC"` | Spring cache type (e.g., GENERIC, NONE). |
+| `ENVIRONMENTS_CACHE_DURATIONS` | `integer` | `no` | `15` | Cache duration in minutes for environments. |
+| `EXTERNAL_QUERY_DEFAULT_TIMEOUT` | `integer` | `no` | `1800` | Default timeout for external queries in seconds. |
+| `EXTERNAL_QUERY_MAX_TIMEOUT` | `integer` | `no` | `3600` | Maximum timeout for external queries in seconds. |
+| `LOG_GRAYLOG_ON` | `boolean` | `no` | `true` | Enable or disable Graylog logging. |
+| `LOG_GRAYLOG_HOST` | `string` | `no` | `""` | Graylog server host. |
+| `LOG_GRAYLOG_PORT` | `integer` | `no` | `12201` | Graylog server port. |
+| `ATP_CRYPTO_KEY` | `string` | `yes` | `""` | Public key for encryption (when ENCRYPT=secrets). |
+| `ATP_CRYPTO_PRIVATE_KEY` | `string` | `yes` | `""` | Private key for encryption (when ENCRYPT=secrets). |
+| `ATP_TDM_URL` | `string` | `no` | `"localhost:8080"` | URL of the ATP TDM service. |
+| `JDBC_URL` | `string` | `yes` | `""` | JDBC connection URL for the database. |
+| `TDM_DB_USER` | `string` | `yes` | `""` | Database username (stored in secrets). |
+| `TDM_DB_PASSWORD` | `string` | `yes` | `""` | Database password (stored in secrets). |
+| `ATP_SERVICE_PUBLIC` | `boolean` | `no` | `true` | Register service as public in gateway. |
+| `ATP_SERVICE_PATH` | `string` | `no` | `"/api/atp-tdm/v1/**"` | Service API path pattern. |
+| `LOCALE_RESOLVER` | `string` | `no` | `"en"` | Locale resolver language code. |
+| `KEYCLOAK_CLIENT_NAME` | `string` | `no` | `"atp-tdm"` | Keycloak client name. |
+| `KEYCLOAK_SECRET` | `string` | `no` | `""` | Keycloak client secret (stored in secrets). |
+| `PROJECT_INFO_ENDPOINT` | `string` | `yes` | `""` | Endpoint URL for project information. |
+| `CONTENT_SECURITY_POLICY` | `string` | `no` | `"default-src 'self' *"` | Content Security Policy header value. |
+| `ZIPKIN_ENABLE` | `boolean` | `no` | `false` | Enable or disable Zipkin tracing. |
+| `ZIPKIN_PROBABILITY` | `float` | `no` | `1.0` | Zipkin sampling probability. |
+| `ZIPKIN_URL` | `string` | `no` | `"http://127.0.0.1:9411"` | Zipkin server URL. |
+| `MONITOR_PORT` | `integer` | `no` | `8090` | Monitoring endpoints port. |
+| `MAX_FILE_SIZE` | `string` | `no` | `"100MB"` | Maximum file size for uploads. |
+| `MAX_REQUEST_SIZE` | `string` | `no` | `"100MB"` | Maximum request size. |
+| `ATP_INTERNAL_GATEWAY_ENABLED` | `boolean` | `no` | `false` | Enable internal gateway routing. |
+| `FEIGN_CONNECT_TIMEOUT` | `integer` | `no` | `300000` | Feign client connection timeout in milliseconds. |
+| `FEIGN_READ_TIMEOUT` | `integer` | `no` | `300000` | Feign client read timeout in milliseconds. |
+| `LIQUIBASE_LAUNCH_ENABLED` | `boolean` | `no` | `true` | Enable or disable Liquibase migrations. |
+| `ATP_HTTP_LOGGING_HEADERS` | `boolean` | `no` | `true` | Enable HTTP headers logging. |
+| `ATP_HTTP_LOGGING_HEADERS_IGNORE` | `string` | `no` | `""` | Comma-separated list of headers to ignore in logging. |
+| `ATP_HTTP_LOGGING_URI_IGNORE` | `string` | `no` | `"/rest/deployment/readiness /rest/deployment/liveness"` | URI patterns to ignore in logging. |
+| `LOCK_DEFAULT_DURATION_SEC` | `integer` | `no` | `60` | Default lock duration in seconds. |
+| `LOCK_RETRY_TIMEOUT_SEC` | `integer` | `no` | `10800` | Lock retry timeout in seconds. |
+| `LOCK_RETRY_PACE_SEC` | `integer` | `no` | `3` | Lock retry interval in seconds. |
+| `LOCK_BULK_ACTION_SEC` | `integer` | `no` | `3600` | Lock duration for bulk actions in seconds. |
+| `SWAGGER_ENABLED` | `boolean` | `no` | `true` | Enable or disable Swagger API documentation. |
+| `PROJECTS_TIME_ZONE` | `string` | `no` | `"GMT+03:00"` | Time zone for projects. |
+| `PROJECTS_DATE_FORMAT` | `string` | `no` | `"d MMM yyyy"` | Date format for projects display. |
+| `PROJECTS_TIME_FORMAT` | `string` | `no` | `"hh:mm:ss a"` | Time format for projects display. |
+| `PROJECTS_EXPIRATION_MONTHS_TIMEOUT` | `integer` | `no` | `1` | Project expiration timeout in months. |
+| `TABLE_EXPIRATION_CRON` | `string` | `no` | `"0 0 0 ? * * *"` | Cron expression for table expiration job. |
+| `DEFAULT_TABLE_EXPIRATION_MONTHS` | `integer` | `no` | `1` | Default table expiration period in months. |
+

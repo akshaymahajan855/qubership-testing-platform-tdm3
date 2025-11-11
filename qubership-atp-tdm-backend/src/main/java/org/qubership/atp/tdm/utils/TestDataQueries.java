@@ -45,7 +45,7 @@ public class TestDataQueries {
             + "WHERE UPPER(TABLE_NAME) = UPPER(?)";
 
     public static final String TABLES_BY_SYSTEM_AND_COLUMN = "SELECT table_name FROM information_schema.COLUMNS "
-            + "WHERE table_name IN (SELECT LOWER(table_name) FROM test_data_table_catalog "
+            + "WHERE LOWER(table_name) IN (SELECT LOWER(table_name) FROM test_data_table_catalog "
             + "WHERE system_id = ? AND environment_id = ?) AND column_name = ?";
 
     public static final String ADD_NEW_COLUMN_VARCHAR = "ALTER TABLE %s ADD COLUMN IF NOT EXISTS \"%s\" VARCHAR";
@@ -201,7 +201,7 @@ public class TestDataQueries {
 
     public static final String GET_ALL_COLUMN_NAMES_BY_SYSTEM_ID =
             "SELECT DISTINCT column_name FROM information_schema.COLUMNS "
-            + "WHERE table_name IN (SELECT LOWER(table_name) FROM test_data_table_catalog "
+            + "WHERE LOWER(table_name) IN (SELECT LOWER(table_name) FROM test_data_table_catalog "
             + "WHERE system_id = ?)";
 
     public static final String GET_AVAILABLE_DATA_FOR_EACH_VALUE =

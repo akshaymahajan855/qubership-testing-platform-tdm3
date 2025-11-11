@@ -877,7 +877,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             List<String> tableNames = catalogRepository
                     .findBySystemId(systemId)
                     .stream()
-                    .map(table -> table.getTableName().toLowerCase()).collect(Collectors.toList());
+                    .map(table -> table.getTableName().toUpperCase()).collect(Collectors.toList());
             if (StringUtils.isNotEmpty(optionalMonitoringConfig.getDescription())) {
                 statsConfig.setDescription(optionalMonitoringConfig.getDescription());
             }
