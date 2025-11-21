@@ -1,7 +1,37 @@
+/*
+ *  Copyright 2024-2025 NetCracker Technology Corporation
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.qubership.atp.tdm.env.configurator.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,13 +43,8 @@ import org.qubership.atp.tdm.env.configurator.model.envgen.YamlEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlSystem;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 @ExtendWith(MockitoExtension.class)
 class GitServiceEnvironmentTest {
@@ -41,15 +66,13 @@ class GitServiceEnvironmentTest {
         yamlMapper.setVisibility(com.fasterxml.jackson.annotation.PropertyAccessor.FIELD, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
 
         // Set up test properties
-        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com");
+        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com/test-project");
         ReflectionTestUtils.setField(gitService, "gitToken", "test-token");
         ReflectionTestUtils.setField(gitService, "ref", "master");
-        ReflectionTestUtils.setField(gitService, "pathToGitProject", "test-project");
-        ReflectionTestUtils.setField(gitService, "pathToFileTopologyParameters", "topology");
-        ReflectionTestUtils.setField(gitService, "pathToFileParameters", "parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToFileCredentials", "credentials.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentParameters", "deployment-parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentCredentials", "deployment-credentials.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentPath", "effective-set/deployment");
+        ReflectionTestUtils.setField(gitService, "ncAppPath", "atp/atp3-playwright-runner");
+        ReflectionTestUtils.setField(gitService, "deploymentParametersPath", "values/deployment-parameters.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentCredentialsPath", "values/deployment-credentials.yaml");
         
         Map<UUID, String> projects = new HashMap<>();
         projects.put(UUID.randomUUID(), "test-project");
@@ -81,7 +104,7 @@ class GitServiceEnvironmentTest {
     }
 
     @Test
-    void testGetLazyEnvironmentsByFileTree_NoEffectiveSet_ShouldSkipEnvironment() throws Exception {
+    void testGetLazyEnvironmentsByFileTree_NoEffectiveSet_ShouldSkipEnvironment() {
         // Given - Test with empty configuration
         Map<String, Object> emptyConfig = new HashMap<>();
         
@@ -94,7 +117,7 @@ class GitServiceEnvironmentTest {
     }
 
     @Test
-    void testGetLazyEnvironmentsByFileTree_InvalidDeploymentParams_ShouldSkipEnvironment() throws Exception {
+    void testGetLazyEnvironmentsByFileTree_InvalidDeploymentParams_ShouldSkipEnvironment() {
         // Given - Test with invalid configuration
         Map<String, Object> invalidConfig = new HashMap<>();
         invalidConfig.put("ATP_ENVGENE_CONFIGURATION", "invalid-data");
@@ -127,7 +150,7 @@ class GitServiceEnvironmentTest {
     }
 
     @Test
-    void testGetLazySystems_WithoutDeploymentCredentials_ShouldReturnOriginalSystems() throws Exception {
+    void testGetLazySystems_WithoutDeploymentCredentials_ShouldReturnOriginalSystems() {
         // Given - Test with empty configuration
         Map<String, Object> emptyConfig = new HashMap<>();
 
@@ -146,7 +169,7 @@ class GitServiceEnvironmentTest {
         UUID systemId = UUID.randomUUID();
         YamlEnvironment yamlEnvironment = createTestYamlEnvironmentWithSystem(environmentId, systemId);
         when(cacheService.get(environmentId)).thenReturn(yamlEnvironment);
-        when(cacheService.getEnvironments()).thenReturn(Arrays.asList(yamlEnvironment));
+        when(cacheService.getEnvironments()).thenReturn(Collections.singletonList(yamlEnvironment));
 
 
         // When
@@ -175,7 +198,7 @@ class GitServiceEnvironmentTest {
         UUID systemId = UUID.randomUUID();
         YamlEnvironment yamlEnvironment = createTestYamlEnvironment(environmentId);
         when(cacheService.get(environmentId)).thenReturn(yamlEnvironment);
-        when(cacheService.getEnvironments()).thenReturn(Arrays.asList(yamlEnvironment));
+        when(cacheService.getEnvironments()).thenReturn(Collections.singletonList(yamlEnvironment));
 
         // When
         List<org.qubership.atp.tdm.env.configurator.model.Connection> connections = 
@@ -187,7 +210,7 @@ class GitServiceEnvironmentTest {
     }
 
     @Test
-    void testGetLazySystemById_ValidSystem_ShouldReturnSystem() throws Exception {
+    void testGetLazySystemById_ValidSystem_ShouldReturnSystem() {
         // Given
         UUID environmentId = UUID.randomUUID();
         UUID systemId = UUID.randomUUID();
@@ -207,7 +230,7 @@ class GitServiceEnvironmentTest {
     }
 
     @Test
-    void testGetLazySystemByName_ValidSystem_ShouldReturnSystem() throws Exception {
+    void testGetLazySystemByName_ValidSystem_ShouldReturnSystem() {
         // Given
         UUID projectId = UUID.randomUUID();
         UUID environmentId = UUID.randomUUID();
@@ -226,10 +249,9 @@ class GitServiceEnvironmentTest {
     }
 
     // Helper methods
-    @SuppressWarnings("unchecked")
     private List<YamlSystem> invokeParseSystemsFromDeploymentParams(Map<String, Object> deploymentParams) {
         try {
-            return (List<YamlSystem>) ReflectionTestUtils.invokeMethod(gitService, 
+            return ReflectionTestUtils.invokeMethod(gitService,
                     "parseSystemsFromDeploymentParams", deploymentParams);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -292,12 +314,10 @@ class GitServiceEnvironmentTest {
         // Map connection names to proper ConnectionType values
         org.qubership.atp.tdm.env.configurator.model.envgen.ConnectionType connectionType;
         switch (name) {
-            case "HTTP":
-                connectionType = org.qubership.atp.tdm.env.configurator.model.envgen.ConnectionType.HTTP;
-                break;
             case "DB":
                 connectionType = org.qubership.atp.tdm.env.configurator.model.envgen.ConnectionType.DB;
                 break;
+            case "HTTP":
             default:
                 connectionType = org.qubership.atp.tdm.env.configurator.model.envgen.ConnectionType.HTTP;
                 break;

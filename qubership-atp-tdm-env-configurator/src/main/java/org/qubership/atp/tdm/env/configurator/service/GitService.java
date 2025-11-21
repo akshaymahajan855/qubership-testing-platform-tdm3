@@ -19,6 +19,9 @@ package org.qubership.atp.tdm.env.configurator.service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -35,6 +38,7 @@ import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.models.RepositoryFile;
 import org.gitlab4j.api.models.TreeItem;
+import org.qubership.atp.tdm.env.configurator.exceptions.internal.TdmEnvDbConnectionException;
 import org.qubership.atp.tdm.env.configurator.model.Connection;
 import org.qubership.atp.tdm.env.configurator.model.Environment;
 import org.qubership.atp.tdm.env.configurator.model.LazyEnvironment;
@@ -42,7 +46,6 @@ import org.qubership.atp.tdm.env.configurator.model.LazyProject;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
 import org.qubership.atp.tdm.env.configurator.model.Project;
 import org.qubership.atp.tdm.env.configurator.model.System;
-import org.qubership.atp.tdm.env.configurator.model.envgen.Configuration;
 import org.qubership.atp.tdm.env.configurator.model.envgen.ConnectionType;
 import org.qubership.atp.tdm.env.configurator.model.envgen.EnvGenProperty;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlConfiguration;
@@ -74,23 +77,17 @@ public class GitService {
     @Value("${git.environments.ref}")
     private String ref;
 
-    @Value("${git.environments.project.path}")
-    private String pathToGitProject;
+    @Value("${git.environments.deployment.path}")
+    private String deploymentPath;
 
-    @Value("${git.environments.topology.parameters.path}")
-    private String pathToFileTopologyParameters;
-
-    @Value("${git.environments.parameters.path}")
-    private String pathToFileParameters;
-
-    @Value("${git.environments.credentials.path}")
-    private String pathToFileCredentials;
+    @Value("${git.environments.deployment.nc.app.path}")
+    private String ncAppPath;
 
     @Value("${git.environments.deployment.parameters.path}")
-    private String pathToDeploymentParameters;
+    private String deploymentParametersPath;
 
     @Value("${git.environments.deployment.credentials.path}")
-    private String pathToDeploymentCredentials;
+    private String deploymentCredentialsPath;
 
     @Value("#{${projects.info}}")
     private Map<UUID, String> projects;
@@ -98,7 +95,6 @@ public class GitService {
     private CacheService cacheService;
     private ObjectMapper enfConfObjectMapper;
     private static final List<String> EXCLUSIONS = Arrays.asList("credentials", "parameters");
-
 
     {
         enfConfObjectMapper = new YAMLMapper();
@@ -120,6 +116,61 @@ public class GitService {
             initializeEnvironmentsCache();
         } else {
             log.warn("Projects map is null or empty, skipping cache initialization");
+        }
+    }
+
+    /**
+     * Extracts base URL from the full git repository URL.
+     * The URL format is expected to be: https://git.example.com/path/to/project
+     * Returns: https://git.example.com (base URL for Git API).
+     */
+    private String getBaseUrl() {
+        if (gitUrl == null || gitUrl.isEmpty()) {
+            throw new IllegalStateException("git.url is not configured");
+        }
+
+        try {
+            URI uri = new URI(gitUrl);
+            String scheme = uri.getScheme();
+            String host = uri.getHost();
+            int port = uri.getPort();
+
+            StringBuilder baseUrlBuilder = new StringBuilder();
+            if (scheme != null) {
+                baseUrlBuilder.append(scheme).append("://");
+            }
+            if (host != null) {
+                baseUrlBuilder.append(host);
+            }
+            if (port != -1) {
+                baseUrlBuilder.append(":").append(port);
+            }
+
+            return baseUrlBuilder.toString();
+        } catch (URISyntaxException e) {
+            log.error("Failed to parse git URL: '{}'. Error: {}", gitUrl, e.getMessage());
+            throw new IllegalStateException("Invalid git URL format: " + gitUrl, e);
+        }
+    }
+
+    /**
+     * Extracts project path from the full git repository URL.
+     * The URL format is expected to be: https://git.example.com/path/to/project
+     * Returns: path/to/project (project path in repository)
+     */
+    private String getProjectPath() {
+        if (gitUrl == null || gitUrl.isEmpty()) {
+            throw new IllegalStateException("git.url is not configured");
+        }
+
+        try {
+            URI uri = new URI(gitUrl);
+            String path = uri.getPath();
+            // Extract project path (remove leading slash if present)
+            return (path != null && !path.isEmpty()) ? path.replaceFirst("^/", "") : "";
+        } catch (URISyntaxException e) {
+            log.error("Failed to parse git URL: '{}'. Error: {}", gitUrl, e.getMessage());
+            throw new IllegalStateException("Invalid git URL format: " + gitUrl, e);
         }
     }
 
@@ -221,7 +272,8 @@ public class GitService {
                             .projectId(projectId)
                             .systems(yamlEnv.getYamlSystems() != null ? 
                                 yamlEnv.getYamlSystems().stream()
-                                    .map(system -> UUID.nameUUIDFromBytes(String.format("%s/%s", yamlEnv.getName(), system.getName()).getBytes()).toString())
+                                    .map(system -> UUID.nameUUIDFromBytes(String.format("%s/%s",
+                                            yamlEnv.getName(), system.getName()).getBytes()).toString())
                                     .collect(Collectors.toList()) : new ArrayList<>())
                             .build();
                     cachedEnvironments.add(lazyEnv);
@@ -248,22 +300,6 @@ public class GitService {
         }
     }
 
-    private List<String> getSystems(String clusterName, String name) throws Exception {
-        String endpoint = gitEndpointToGetParametersFile(clusterName, name);
-        Configuration configuration = getYamlConfiguration(endpoint).getConfiguration();
-        return configuration.getSystems()
-                .stream()
-                .map(system -> {
-                    return UUID.nameUUIDFromBytes(String.format("%s/%s", name, system.getName()).getBytes()).toString();
-                }).collect(Collectors.toList());
-    }
-
-    public List<YamlSystem> getYamlSystems(String clusterName, String name) throws Exception {
-        String endpoint = gitEndpointToGetParametersFile(clusterName, name);
-        Configuration configuration = getYamlConfiguration(endpoint).getConfiguration();
-        return configuration.getSystems();
-    }
-
     public List<LazySystem> getLazySystems(UUID environmentId) {
         try {
             YamlEnvironment yamlEnvironment = cacheService.get(environmentId);
@@ -282,7 +318,8 @@ public class GitService {
             List<YamlSystem> yamlSystems = new ArrayList<>(yamlEnvironment.getYamlSystems());
             
             try {
-                String deploymentCredentialsPath = gitEndpointToGetDeploymentCredentialsFile(clusterName, pureEnvironmentName);
+                String deploymentCredentialsPath = gitEndpointToGetDeploymentCredentialsFile(clusterName,
+                        pureEnvironmentName);
                 List<YamlSystem> credentialsSystems = parseYamlFileAndExtractSystems(
                         deploymentCredentialsPath, clusterName, pureEnvironmentName);
                 yamlSystems = mergeSystems(yamlSystems, credentialsSystems);
@@ -347,7 +384,7 @@ public class GitService {
         }
         if (yamlSystem != null) {
             YamlSystem finalYamlSystem = yamlSystem;
-            List<Connection> connections = yamlSystem.getConnections().stream().map(yamlConnection -> {
+            return yamlSystem.getConnections().stream().map(yamlConnection -> {
                 Connection connection = new Connection();
                 connection.setId(yamlConnection.getId());
                 connection.setName(yamlConnection.getName());
@@ -356,35 +393,30 @@ public class GitService {
                 connection.setParameters(yamlConnection.getParameters());
                 return connection;
             }).collect(Collectors.toList());
-
-            return connections;
         }
         return new ArrayList<>();
-
     }
 
     public LazySystem getLazySystemById(UUID environmentId, UUID systemId) {
         YamlEnvironment yamlEnvironment = cacheService.get(environmentId);
         YamlSystem yamlSystem = yamlEnvironment.getSystemById(systemId);
-        LazySystem lazySystem = LazySystem.builder()
+        return LazySystem.builder()
                 .id(yamlSystem.getId())
                 .name(yamlSystem.getName())
                 .connections(yamlSystem.getListConnections())
                 .build();
-        return lazySystem;
     }
 
     public List<LazySystem> getLazySystemsByProjectIdWithConnections(UUID projectId) {
         List<LazySystem> systems = new ArrayList<>();
 
         for (YamlEnvironment yamlEnvironment : cacheService.getEnvironments()) {
-            List<LazySystem> lazySystems = yamlEnvironment.getYamlSystems().stream().map(yamlSystem -> {
-                return LazySystem.builder()
-                        .id(yamlSystem.getId())
-                        .name(yamlSystem.getName())
-                        .connections(yamlSystem.getListConnections())
-                        .build();
-            }).collect(Collectors.toList());
+            List<LazySystem> lazySystems = yamlEnvironment.getYamlSystems().stream().map(yamlSystem ->
+                    LazySystem.builder()
+                    .id(yamlSystem.getId())
+                    .name(yamlSystem.getName())
+                    .connections(yamlSystem.getListConnections())
+                    .build()).collect(Collectors.toList());
 
             systems.addAll(lazySystems);
         }
@@ -419,7 +451,7 @@ public class GitService {
     private Map<String, Object> checkEnvironmentConfiguration(Map<String, Object> mapConfiguration, String endpoint) {
         if (!mapConfiguration.containsKey(EnvGenProperty.ENVIRONMENTS.toString())) {
             String error = String.format("Invalid configuration by path '%s'. "
-                            + "Configuration doesn't contains mandatory attribute [%s].",
+                            + "Configuration doesn't contain mandatory attribute [%s].",
                     endpoint, EnvGenProperty.ENVIRONMENTS
             );
             throw new IllegalArgumentException(error);
@@ -451,6 +483,12 @@ public class GitService {
             return connection;
         }).collect(Collectors.toList());
 
+        boolean hasDbConnection = connections.stream()
+                .anyMatch(connection -> "DB".equalsIgnoreCase(connection.getName()));
+        if (!hasDbConnection) {
+            throw new TdmEnvDbConnectionException("DB");
+        }
+
         System system = System.builder()
                 .environmentId(environmentId)
                 .connections(connections).build();
@@ -460,7 +498,7 @@ public class GitService {
         return system;
     }
 
-    private List<System> getFullSystems(LazyEnvironment lazyEnvironment) throws Exception {
+    private List<System> getFullSystems(LazyEnvironment lazyEnvironment) {
         YamlEnvironment yamlEnvironment = new YamlEnvironment(lazyEnvironment.getName());
         yamlEnvironment.setClusterName(lazyEnvironment.getClusterName());
 
@@ -472,7 +510,8 @@ public class GitService {
         return yamlSystems.stream()
                 .map(yamlSystem -> {
                     List<Connection> connections = yamlSystem.getConnections().stream()
-                            .map(yamlConnection -> convertYamlConnectionToConnection(yamlConnection, yamlSystem.getId()))
+                            .map(yamlConnection ->
+                                    convertYamlConnectionToConnection(yamlConnection, yamlSystem.getId()))
                             .collect(Collectors.toList());
 
                     System system = System.builder()
@@ -504,41 +543,33 @@ public class GitService {
 
     private RepositoryFile getGitFile(String gitEndpoint) throws Exception {
         RepositoryFile file;
-        try (GitLabApi gitLabApi = new GitLabApi(gitUrl, gitToken)) {
-            file = gitLabApi.getRepositoryFileApi().getFile(pathToGitProject, gitEndpoint, ref);
+        try (GitLabApi gitLabApi = new GitLabApi(getBaseUrl(), gitToken)) {
+            file = gitLabApi.getRepositoryFileApi().getFile(getProjectPath(), gitEndpoint, ref);
         } catch (GitLabApiException e) {
             if ("Not Found".equals(e.getReason()) && e.getHttpStatus() == 404) {
                 log.error("Git file not found by - {}.", gitEndpoint, e);
             }
             throw e;
         } catch (Exception e) {
-            log.error("Error while occurred get file from git.", e);
+            log.error("Error occurred while getting file from git.", e);
             throw e;
         }
         return file;
     }
 
-    private String gitEndpointToGetTopologyParametersFile() {
-        return String.format("environments/%s", pathToFileTopologyParameters);
-    }
-
-    private String gitEndpointToGetParametersFile(String clusterName, String name) {
-        return String.format("environments/%s/%s/%s", clusterName, name, pathToFileParameters);
-    }
-
-    private String gitEndpointToGetCredentialsFile(String clusterName, String name) {
-        return String.format("environments/%s/%s/%s", clusterName, name, pathToFileCredentials);
-    }
-
     private String gitEndpointToGetDeploymentParametersFile(String clusterName, String environmentName) {
-        return buildPath("environments", clusterName, environmentName, pathToDeploymentParameters);
+        String fullPath = buildPath(deploymentPath, ncAppPath, deploymentParametersPath);
+        return buildPath("environments", clusterName, environmentName, fullPath);
     }
 
     private String gitEndpointToGetDeploymentCredentialsFile(String clusterName, String environmentName) {
-        return buildPath("environments", clusterName, environmentName, pathToDeploymentCredentials);
+        String fullPath = buildPath(deploymentPath, ncAppPath, deploymentCredentialsPath);
+        return buildPath("environments", clusterName, environmentName, fullPath);
     }
 
-    private List<YamlSystem> parseYamlFileAndExtractSystems(String filePath, String clusterName, String environmentName) {
+    private List<YamlSystem> parseYamlFileAndExtractSystems(String filePath,
+                                                            String clusterName,
+                                                            String environmentName) {
         try {
             String content = getFileContentAsString(filePath);
             Map<String, Object> yamlParams = enfConfObjectMapper.readValue(content, Map.class);
@@ -551,12 +582,11 @@ public class GitService {
     }
 
     private List<YamlSystem> loadAndMergeSystemsFromFiles(String clusterName, String environmentName) {
-        List<YamlSystem> yamlSystems = new ArrayList<>();
-        
+
         String deploymentParamsPath = gitEndpointToGetDeploymentParametersFile(clusterName, environmentName);
         List<YamlSystem> paramsSystems = parseYamlFileAndExtractSystems(
                 deploymentParamsPath, clusterName, environmentName);
-        yamlSystems.addAll(paramsSystems);
+        List<YamlSystem> yamlSystems = new ArrayList<>(paramsSystems);
         
         String deploymentCredentialsPath = gitEndpointToGetDeploymentCredentialsFile(clusterName, environmentName);
         List<YamlSystem> credentialsSystems = parseYamlFileAndExtractSystems(
@@ -592,13 +622,14 @@ public class GitService {
      */
     public List<RepositoryFile> getAllFilesFromDirectory(String directoryPath) throws Exception {
         List<RepositoryFile> files = new ArrayList<>();
-        try (GitLabApi gitLabApi = new GitLabApi(gitUrl, gitToken)) {
-            List<TreeItem> treeItems = gitLabApi.getRepositoryApi().getTree(pathToGitProject, directoryPath, ref, true);
-            
+        try (GitLabApi gitLabApi = new GitLabApi(getBaseUrl(), gitToken)) {
+            List<TreeItem> treeItems = gitLabApi.getRepositoryApi().getTree(getProjectPath(), directoryPath, ref, true);
+
             for (TreeItem item : treeItems) {
-                if ("blob".equals(item.getType())) { // blob = file, tree = directory
+                if (TreeItem.Type.BLOB.equals(item.getType())) { // blob = file, tree = directory
                     try {
-                        RepositoryFile file = gitLabApi.getRepositoryFileApi().getFile(pathToGitProject, item.getPath(), ref);
+                        RepositoryFile file = gitLabApi.getRepositoryFileApi()
+                                .getFile(getProjectPath(), item.getPath(), ref);
                         files.add(file);
                     } catch (GitLabApiException e) {
                         log.warn("Failed to get file: {}", item.getPath(), e);
@@ -623,13 +654,14 @@ public class GitService {
      */
     public List<RepositoryFile> getAllFilesRecursively(String directoryPath) throws Exception {
         List<RepositoryFile> allFiles = new ArrayList<>();
-        try (GitLabApi gitLabApi = new GitLabApi(gitUrl, gitToken)) {
-            List<TreeItem> treeItems = gitLabApi.getRepositoryApi().getTree(pathToGitProject, directoryPath, ref, true);
-            
+        try (GitLabApi gitLabApi = new GitLabApi(getBaseUrl(), gitToken)) {
+            List<TreeItem> treeItems = gitLabApi.getRepositoryApi().getTree(getProjectPath(), directoryPath, ref, true);
+
             for (TreeItem item : treeItems) {
                 if (TreeItem.Type.BLOB.equals(item.getType())) {
                     try {
-                        RepositoryFile file = gitLabApi.getRepositoryFileApi().getFile(pathToGitProject, item.getPath(), ref);
+                        RepositoryFile file = gitLabApi.getRepositoryFileApi()
+                                .getFile(getProjectPath(), item.getPath(), ref);
                         allFiles.add(file);
                     } catch (GitLabApiException e) {
                         log.warn("Failed to get file: {}", item.getPath(), e);
@@ -646,8 +678,6 @@ public class GitService {
         return allFiles;
     }
 
-
-
     /**
      * Get list of all files in repository (names and paths only)
      * @param directoryPath path to directory (empty string for repository root)
@@ -655,8 +685,8 @@ public class GitService {
      * @throws Exception if error occurred while getting file list
      */
     private List<TreeItem> getFileTree(String directoryPath) throws Exception {
-        try (GitLabApi gitLabApi = new GitLabApi(gitUrl, gitToken)) {
-            return gitLabApi.getRepositoryApi().getTree(pathToGitProject, directoryPath, ref, true);
+        try (GitLabApi gitLabApi = new GitLabApi(getBaseUrl(), gitToken)) {
+            return gitLabApi.getRepositoryApi().getTree(getProjectPath(), directoryPath, ref, true);
         } catch (GitLabApiException e) {
             log.error("Error getting file tree: {}", directoryPath, e);
             throw e;
@@ -675,7 +705,7 @@ public class GitService {
     public String getFileContentAsString(String filePath) throws Exception {
         RepositoryFile file = getGitFile(filePath);
         byte[] decodedBytes = Base64.getDecoder().decode(file.getContent());
-        return new String(decodedBytes, "UTF-8");
+        return new String(decodedBytes, StandardCharsets.UTF_8);
     }
 
     /**
@@ -686,9 +716,10 @@ public class GitService {
      */
     public List<String> getDirectoryNames(String directoryPath) throws Exception {
         List<String> directoryNames = new ArrayList<>();
-        try (GitLabApi gitLabApi = new GitLabApi(gitUrl, gitToken)) {
-            List<TreeItem> treeItems = gitLabApi.getRepositoryApi().getTree(pathToGitProject, directoryPath, ref, false);
-            
+        try (GitLabApi gitLabApi = new GitLabApi(getBaseUrl(), gitToken)) {
+            List<TreeItem> treeItems = gitLabApi.getRepositoryApi()
+                    .getTree(getProjectPath(), directoryPath, ref, false);
+
             for (TreeItem item : treeItems) {
                 if (TreeItem.Type.TREE.equals(item.getType())) {
                     String dirName = item.getName();
@@ -709,7 +740,7 @@ public class GitService {
 
     public List<LazyEnvironment> getLazyEnvironmentsByFileTree(UUID projectId) {
         try {
-            String environmentsPath = gitEndpointToGetTopologyParametersFile();
+            String environmentsPath = "environments/";
             List<String> envClusterNames = getDirectoryNames(environmentsPath);
             List<LazyEnvironment> lazyEnvironments = new ArrayList<>();
             
@@ -725,11 +756,14 @@ public class GitService {
                             boolean hasEffectiveSet = envSubDirs.contains("effective-set");
                             
                             if (hasEffectiveSet) {
-                                String deploymentParamsPath = buildPath(envPath, pathToDeploymentParameters);
-                                
+                                String fullDeploymentPath = buildPath(deploymentPath, ncAppPath,
+                                        deploymentParametersPath);
+                                String deploymentParamsPath = buildPath(envPath, fullDeploymentPath);
+
                                 try {
                                     String paramsContent = getFileContentAsString(deploymentParamsPath);
-                                    Map<String, Object> deploymentParams = enfConfObjectMapper.readValue(paramsContent, Map.class);
+                                    Map<String, Object> deploymentParams =
+                                            enfConfObjectMapper.readValue(paramsContent, Map.class);
                                     List<YamlSystem> yamlSystems = parseSystemsFromDeploymentParams(deploymentParams);
                                     
                                     if (!yamlSystems.isEmpty()) {
@@ -740,7 +774,9 @@ public class GitService {
                                                 .clusterName(envClusterName)
                                                 .projectId(projectId)
                                                 .systems(yamlSystems.stream()
-                                                        .map(system -> UUID.nameUUIDFromBytes(String.format("%s/%s", fullEnvName, system.getName()).getBytes()).toString())
+                                                        .map(system -> UUID.nameUUIDFromBytes(
+                                                                String.format("%s/%s", fullEnvName,
+                                                                        system.getName()).getBytes()).toString())
                                                         .collect(Collectors.toList()))
                                                 .build();
                                         lazyEnvironments.add(lazyEnvironment);
@@ -795,14 +831,16 @@ public class GitService {
                             String systemName = systemEntry.getKey();
                             Map<String, Object> systemData = (Map<String, Object>) systemEntry.getValue();
                             
-                            List<Map<String, Object>> connectionsList = (List<Map<String, Object>>) systemData.get("connections");
+                            List<Map<String, Object>> connectionsList =
+                                    (List<Map<String, Object>>) systemData.get("connections");
                             List<YamlConnection> connections = new ArrayList<>();
                             
                             if (connectionsList != null) {
                                 for (Map<String, Object> connectionMap : connectionsList) {
                                     for (Map.Entry<String, Object> connectionEntry : connectionMap.entrySet()) {
                                         String connectionType = connectionEntry.getKey();
-                                        Map<String, Object> connectionData = (Map<String, Object>) connectionEntry.getValue();
+                                        Map<String, Object> connectionData =
+                                                (Map<String, Object>) connectionEntry.getValue();
                                         
                                         YamlConnection yamlConnection = new YamlConnection();
                                         yamlConnection.setId(UUID.randomUUID());
@@ -835,7 +873,6 @@ public class GitService {
         } catch (Exception e) {
             log.error("Error parsing deployment parameters: {}", e.getMessage(), e);
         }
-        
         return systems;
     }
 
@@ -874,13 +911,11 @@ public class GitService {
                                 });
                     }
                 }
-                
                 existingSystem.setConnections(mergedConnections);
             } else {
                 systemMap.put(systemName, newSystem);
             }
         }
-        
         return new ArrayList<>(systemMap.values());
     }
 

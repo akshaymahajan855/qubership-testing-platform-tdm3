@@ -1,7 +1,36 @@
+/*
+ *  Copyright 2024-2025 NetCracker Technology Corporation
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.qubership.atp.tdm.env.configurator.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,12 +42,8 @@ import org.qubership.atp.tdm.env.configurator.model.envgen.YamlConnection;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlSystem;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 @ExtendWith(MockitoExtension.class)
 class GitServiceTest {
@@ -40,15 +65,13 @@ class GitServiceTest {
         yamlMapper.setVisibility(com.fasterxml.jackson.annotation.PropertyAccessor.FIELD, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
 
         // Set up test properties
-        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com");
+        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com/test-project");
         ReflectionTestUtils.setField(gitService, "gitToken", "test-token");
         ReflectionTestUtils.setField(gitService, "ref", "master");
-        ReflectionTestUtils.setField(gitService, "pathToGitProject", "test-project");
-        ReflectionTestUtils.setField(gitService, "pathToFileTopologyParameters", "topology");
-        ReflectionTestUtils.setField(gitService, "pathToFileParameters", "parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToFileCredentials", "credentials.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentParameters", "deployment-parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentCredentials", "deployment-credentials.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentPath", "effective-set/deployment");
+        ReflectionTestUtils.setField(gitService, "ncAppPath", "atp/atp3-playwright-runner");
+        ReflectionTestUtils.setField(gitService, "deploymentParametersPath", "values/deployment-parameters.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentCredentialsPath", "values/deployment-credentials.yaml");
         ReflectionTestUtils.setField(gitService, "projects", new HashMap<>());
 
         // Load test file contents
@@ -164,7 +187,7 @@ class GitServiceTest {
     }
 
     @Test
-    void testParseYamlFileAndExtractSystems_InvalidFile_ShouldReturnEmptyList() throws Exception {
+    void testParseYamlFileAndExtractSystems_InvalidFile_ShouldReturnEmptyList() {
         // Given - Test with invalid configuration structure that should result in empty systems
         Map<String, Object> invalidConfig = new HashMap<>();
         invalidConfig.put("ATP_ENVGENE_CONFIGURATION", "invalid-string-instead-of-object");
@@ -178,7 +201,7 @@ class GitServiceTest {
     }
 
     @Test
-    void testParseYamlFileAndExtractSystems_GitException_ShouldReturnEmptyList() throws Exception {
+    void testParseYamlFileAndExtractSystems_GitException_ShouldReturnEmptyList() {
         // Given - Test with empty configuration that would result in empty systems
         Map<String, Object> emptyConfig = new HashMap<>();
         
@@ -191,14 +214,12 @@ class GitServiceTest {
     }
 
     @Test
-    void testParseYamlFileAndExtractSystems_InvalidYamlSyntax_ShouldThrowException() throws Exception {
+    void testParseYamlFileAndExtractSystems_InvalidYamlSyntax_ShouldThrowException() {
         // Given - Test with truly invalid YAML syntax
         String invalidYaml = "invalid: yaml: content: [\n  - unclosed: list\n  - missing: closing";
         
         // When & Then - Should throw exception for invalid YAML syntax
-        assertThrows(Exception.class, () -> {
-            yamlMapper.readValue(invalidYaml, Map.class);
-        });
+        assertThrows(Exception.class, () -> yamlMapper.readValue(invalidYaml, Map.class));
     }
 
     @Test
@@ -350,22 +371,19 @@ class GitServiceTest {
     }
 
     // Helper methods to invoke private methods
-    @SuppressWarnings("unchecked")
     private List<YamlSystem> invokeParseSystemsFromDeploymentParams(Map<String, Object> deploymentParams) {
         try {
-            List<YamlSystem> result = (List<YamlSystem>) ReflectionTestUtils.invokeMethod(gitService, 
+            return ReflectionTestUtils.invokeMethod(gitService,
                     "parseSystemsFromDeploymentParams", deploymentParams);
-            return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
 
-    @SuppressWarnings("unchecked")
     private List<YamlSystem> invokeMergeSystems(List<YamlSystem> existingSystems, List<YamlSystem> newSystems) {
         try {
-            return (List<YamlSystem>) ReflectionTestUtils.invokeMethod(gitService, 
+            return ReflectionTestUtils.invokeMethod(gitService,
                     "mergeSystems", existingSystems, newSystems);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -374,12 +392,11 @@ class GitServiceTest {
 
     private String invokeBuildPath(String... paths) {
         try {
-            return (String) ReflectionTestUtils.invokeMethod(gitService, "buildPath", (Object) paths);
+            return ReflectionTestUtils.invokeMethod(gitService, "buildPath", (Object) paths);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 
     private List<YamlSystem> createTestSystems(String... systemNames) {
         List<YamlSystem> systems = new ArrayList<>();
@@ -396,7 +413,7 @@ class GitServiceTest {
             params.put("url", "https://" + systemName + ".example.com");
             connection.setParameters(params);
             
-            system.setConnections(Arrays.asList(connection));
+            system.setConnections(Collections.singletonList(connection));
             systems.add(system);
         }
         return systems;

@@ -1,10 +1,7 @@
-{{- if eq .Values.PAAS_PLATFORM "KUBERNETES" }}
-  {{- if .Values.atp3tdm.externalLinkEnabled }}
----
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+  name: '{{ .Values.SERVICE_NAME }}'
   annotations:
     haproxy.router.openshift.io/timeout: 10h
 spec:
@@ -21,6 +18,4 @@ spec:
               service:
                 port:
                   number: 8080
-                name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-  {{- end }}
-{{- end }}
+                name: '{{ .Values.SERVICE_NAME }}'

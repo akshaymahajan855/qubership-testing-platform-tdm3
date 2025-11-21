@@ -1,125 +1,89 @@
 PAAS_PLATFORM: "KUBERNETES"
-# Placeholder for Public key for ENCRYPT
-ATP_CRYPTO_KEY: ""
-# Placeholder for Private key for ENCRYPT
-ATP_CRYPTO_PRIVATE_KEY: ""
-# Set to ATP2 to enable Prometheus scrapping
+DOCKER_TAG: ""
+# Deployment Config/Service type
 SERVICE_TYPE: "ATP3"
-# Spring profile for security
-ACTIVE_PROFILES_SPRING: "disable-security"
-# Which docker image should be used to deploy
-DOCKER_TAG: "artifactory-service-address/path-to-image"
-# Encyption option. One of - dev (default, encrypt inside app); - secrets (encrypt keys in Openshift secrets)
-ENCRYPT: "dev"
-FEIGN_CONNECT_TIMEOUT: "300000"
-FEIGN_READ_TIMEOUT: "300000"
-# Host of graylog
-GRAYLOG_HOST: "tcp:graylog-service-address"
-# This option turns on or off logging in graylog
-GRAYLOG_ON: "true"
-# Port of graylog
-GRAYLOG_PORT: "12201"
-PROFILER_ENABLED: "false"
-# host of profiler collector
-REMOTE_DUMP_HOST: "esc-collector-service.profiler.svc"
-# port of profiler collector
-REMOTE_DUMP_PORT: "1710"
-
-# Url atp-keycloak with auth
-KEYCLOAK_AUTH_URL: ""
-# Keycloak enabled
-KEYCLOAK_ENABLED: "false"
-# Keycloak realm
-KEYCLOAK_REALM: "atp3"
-# Mail sender endpoint
-MAIL_SENDER_ENDPOINT: "/api/v1/mail-sender/mail/send"
-# Mail sender port
-MAIL_SENDER_PORT: "8080"
-# Mail sender enable
-MAIL_SENDER_ENABLE: "true"
-# Mail sender URL
-MAIL_SENDER_URL: ""
-# Rest end point for projects
-PROJECT_INFO_ENDPOINT: "/api/v1/users/projects"
-# Security Context properties
-# enabled is a flag to enable Security Context
-SECURITY_CONTEXT_ENABLED: false
-# Deployment Config/Service name.
+SWAGGER_ENABLED: "false"
+CONTENT_SECURITY_POLICY: "*"
+SPRING_PROFILES: "disable-security"
 SERVICE_NAME: "atp3-tdm-be"
-# Deployment Config/Service type.
-SERVICE_PORT_TYPE: "NodePort"
+SERVICE_PORT_TYPE: "ClusterIP"
+# Logging
+GRAYLOG_HOST: "udp:graylog-service.example.com"
+GRAYLOG_ON: "true"
+GRAYLOG_PORT: "12201"
+# Profiler
+PROFILER_ENABLED: "false"
+REMOTE_DUMP_HOST: "esc-collector-service.profiler.svc"
+REMOTE_DUMP_PORT: "1710"
+# Keycloak integration
+KEYCLOAK_ENABLED: "false"
+ENCRYPT: "dev"
+ATP_CRYPTO_KEY: ""
+ATP_CRYPTO_PRIVATE_KEY: ""
+KEYCLOAK_AUTH_URL: ""
+KEYCLOAK_REALM: "atp3"
+# Mail sender
+MAIL_SENDER_ENABLE: "false"
+MAIL_SENDER_ENDPOINT: "/api/v1/mail-sender/mail/send"
+MAIL_SENDER_PORT: "8080"
+MAIL_SENDER_URL: ""
+# Security Context properties
+SECURITY_CONTEXT_ENABLED: false
 # Host of Eureka server
 SERVICE_REGISTRY_URL: ""
-LABEL: ''
+# Zipkin settings
 ZIPKIN_ENABLE: "false"
 ZIPKIN_PROBABILITY: "1.0"
 ZIPKIN_URL: "http://zipkin.zipkin.svc:9411"
-
-CONTENT_SECURITY_POLICY: "*"
+# Feign settings
+FEIGN_CONNECT_TIMEOUT: "300000"
+FEIGN_READ_TIMEOUT: "300000"
 FEIGN_ATP_MAILSENDER_URL: ""
 FEIGN_ATP_MAILSENDER_NAME: "ATP-MAIL-SENDER"
 FEIGN_ATP_MAILSENDER_ROUTE: "api/atp-mail-sender/v1"
 FEIGN_ATP_HIGHCHARTS_NAME: "ATP-CHARTS"
 FEIGN_ATP_HIGHCHARTS_ROUTE: "api/atp-charts/v1"
 FEIGN_ATP_HIGHCHARTS_URL: ""
+# EnvGene configuration
+ENVGENE_GIT_REPO_URL: ""
+ENVGENE_GIT_REPO_TOKEN: ""
+ENVGENE_GIT_REPO_BRANCH: ""
+ENVGENE_GIT_REPO_DEPLOYMENT_PATH: "effective-set/deployment"
+ENVGENE_GIT_REPO_NC_APP_PATH: "atp/atp3-playwright-runner"
+ENVGENE_GIT_REPO_CREDENTIALS_PATH: "values/credentials.yaml"
+ENVGENE_GIT_REPO_DEPLOYMENT_PARAMETERS_PATH: "values/deployment-parameters.yaml"
 
-# Swagger
-SWAGGER_ENABLED: 'false'
-EXTERNAL_QUERY_DEFAULT_TIMEOUT: "1800"
-EXTERNAL_QUERY_MAX_TIMEOUT: "3600"
 atp3tdm:
-  projectsInfo: {}
-  gitUrl: ''
-  gitToken: ''
-  gitEnvironmentsRef: ''
-  gitEnvironmentsProjectPath: ''
-  gitEnvironmentsTopologyParametersPath: ''
-  gitEnvironmentsParametersPath: ''
-  gitEnvironmentsCredentialsPath: ''
-  gitEnvironmentsDeploymentParametersPath: '/effective-set/deployment/atp/atp3-playwright-runner/values/deployment-parameters.yaml'
-  gitEnvironmentsDeploymentCredentialsPath: '/effective-set/deployment/atp/atp3-playwright-runner/values/credentials.yaml'
+  externalQueryDefaultTimeout: "1800"
+  externalQueryMaxTimeout: "1800"
+  projectInfoEndpoint: "/api/v1/users/projects"
+  gitProjectsInfo: {}
   atpInternalGatewayEnabled: "false"
-  # Api url for routing by eureka
   atpServicePath: "/api/atp-tdm/v1/**"
-  # Register to public gateway in eureka
   atpServicePublic: "false"
   environmentsCacheDurations: "15"
   environmentsSpringCacheType: "GENERIC"
-  # Eureka client enabled
   eurekaClientEnabled: "false"
-  # Sender e-mail address
-  fromEmailAddress: "example@example.com"
-  # Self-pointing external URL
+  fromEmailAddress: "tdm-tool-service@example.com"
   identityProviderUrl: ""
   jmxEnable: "true"
   jmxPort: "3000"
   jmxRmiPort: "3001"
   serviceEntitiesMigrationEnabled: 'false'
-  # Keycloak client name
   keycloakClientName: "atp-tdm"
-  # Keycloak secret
   keycloakSecret: ""
-  # locale resolver
   localeResolver: "en"
-  # Label for project.
   maxFileSize: "100MB"
   maxRequestSize: "100MB"
-  # runAsUser is the user ID used to run the container
   podSecurityContext:
     runAsUser: 1000
     fsGroup: 1000
   containerSecurityContext: {}
-  # Host of db
   h2DbAddr: "database"
-  # Port of db
   h2DbProperty: "MODE=PostgreSQL"
-  # Name of db
   tdmDb: ""
-  # Password for db
   tdmDbPassword: ""
-  # User for db
   tdmDbUser: ""
-  # insecure Edge Termination Policy.
   terminationPolicy: "Redirect"
   # Liquibase properties
   liquibaseEnabled: "false"
@@ -132,22 +96,8 @@ atp3tdm:
   atpHttpLoggingHeadersIgnore: "Authorization"
   atpHttpLoggingUriIgnore: "/rest/deployment/readiness /rest/deployment/liveness /api/tdm/download/csv"
   logLevel: "INFO"
-  #Enabling installation of external link for service
-  externalLinkEnabled: false
-  #kubernetes.io/hostname: worker1-atpkub
-  #Example:  "nodeSelector": {"kubernetes.io/hostname": "worker16-atp2k8"}
   nodeSelector: {}
   heapDumpEnabled: false
-  #Example for CMD: "extraEnvs": [
-  #    {
-  #      "name": "DISABLE_INSTALL_DEMO_CONFIG",
-  #      "value": "true"
-  #    },
-  #    {
-  #      "name": "DISABLE_SECURITY_PLUGIN",
-  #      "value": "true"
-  #    }
-  #  ]
   extraEnvs: []
   storageSize: "1Gi"
   storageClassName: "csi-sc-cinderplugin"
