@@ -87,7 +87,7 @@ The following parameters are passed to `application.properties` during deploymen
 | `SERVICE_NAME` | `string` | `yes` | `"atp3-tdm-be"` | Deployment Config/Service name. |
 | `LOG_LEVEL` | `string` | `no` | `"INFO"` | Logging level for the application. |
 | `SPRING_PROFILES` | `string` | `no` | `"disable-security"` | Spring profile for security configuration. |
-| `ENVGENE_GIT_REPO_URL` | `string` | `yes` | `""` | Full Git repository URL including project path (e.g., https://git.netcracker.com/path/to/project). |
+| `ENVGENE_GIT_REPO_URL` | `string` | `yes` | `""` | Full Git repository URL including project path. |
 | `ENVGENE_GIT_REPO_TOKEN` | `string` | `yes` | `""` | Access token for private Git repositories. |
 | `ENVGENE_GIT_REPO_BRANCH` | `string` | `no` | `"master"` | Git branch or tag reference for environments configuration. |
 | `ENVGENE_GIT_REPO_DEPLOYMENT_PATH` | `string` | `no` | `"effective-set/deployment"` | Base path to deployment configuration in Git repository. Used to construct full paths to deployment files. |
