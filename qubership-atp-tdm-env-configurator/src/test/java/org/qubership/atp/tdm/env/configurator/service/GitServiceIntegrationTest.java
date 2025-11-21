@@ -1,7 +1,31 @@
+/*
+ *  Copyright 2024-2025 NetCracker Technology Corporation
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package org.qubership.atp.tdm.env.configurator.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +37,8 @@ import org.qubership.atp.tdm.env.configurator.model.envgen.YamlConnection;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlSystem;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 @ExtendWith(MockitoExtension.class)
 class GitServiceIntegrationTest {
@@ -38,15 +59,13 @@ class GitServiceIntegrationTest {
         yamlMapper.setVisibility(com.fasterxml.jackson.annotation.PropertyAccessor.FIELD, com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY);
 
         // Set up test properties
-        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com");
+        ReflectionTestUtils.setField(gitService, "gitUrl", "https://git.test.com/test-project");
         ReflectionTestUtils.setField(gitService, "gitToken", "test-token");
         ReflectionTestUtils.setField(gitService, "ref", "master");
-        ReflectionTestUtils.setField(gitService, "pathToGitProject", "test-project");
-        ReflectionTestUtils.setField(gitService, "pathToFileTopologyParameters", "topology");
-        ReflectionTestUtils.setField(gitService, "pathToFileParameters", "parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToFileCredentials", "credentials.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentParameters", "deployment-parameters.yaml");
-        ReflectionTestUtils.setField(gitService, "pathToDeploymentCredentials", "deployment-credentials.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentPath", "effective-set/deployment");
+        ReflectionTestUtils.setField(gitService, "ncAppPath", "atp/atp3-playwright-runner");
+        ReflectionTestUtils.setField(gitService, "deploymentParametersPath", "values/deployment-parameters.yaml");
+        ReflectionTestUtils.setField(gitService, "deploymentCredentialsPath", "values/deployment-credentials.yaml");
         ReflectionTestUtils.setField(gitService, "projects", new HashMap<>());
     }
 
@@ -69,7 +88,7 @@ class GitServiceIntegrationTest {
         YamlSystem system1 = findSystemByName(systems, "test-system-1");
         assertNotNull(system1);
         assertEquals(2, system1.getConnections().size());
-        
+
         // Verify HTTP connection
         YamlConnection httpConn = findConnectionByName(system1.getConnections(), "HTTP");
         assertNotNull(httpConn);
@@ -93,7 +112,7 @@ class GitServiceIntegrationTest {
         YamlSystem system2 = findSystemByName(systems, "test-system-2");
         assertNotNull(system2);
         assertEquals(2, system2.getConnections().size());
-        
+
         // Verify MQ connection
         YamlConnection mqConn = findConnectionByName(system2.getConnections(), "JMS Asynchronous");
         assertNotNull(mqConn);
@@ -107,7 +126,7 @@ class GitServiceIntegrationTest {
         YamlSystem system3 = findSystemByName(systems, "test-system-3");
         assertNotNull(system3);
         assertEquals(2, system3.getConnections().size());
-        
+
         // Verify REST connection
         YamlConnection restConn = findConnectionByName(system3.getConnections(), "REST Synchronous");
         assertNotNull(restConn);
@@ -148,7 +167,7 @@ class GitServiceIntegrationTest {
         assertTrue(credentials.containsKey("TEST_SYSTEM_3_REST_API_KEY"));
         assertTrue(credentials.containsKey("TEST_SYSTEM_3_FTP_USERNAME"));
         assertTrue(credentials.containsKey("TEST_SYSTEM_3_FTP_PASSWORD"));
-        assertTrue(credentials.containsKey("GIT_TOKEN"));
+        assertTrue(credentials.containsKey("ENVGENE_GIT_REPO_TOKEN"));
         assertTrue(credentials.containsKey("STORAGE_USERNAME"));
         assertTrue(credentials.containsKey("STORAGE_PASSWORD"));
 
@@ -164,7 +183,7 @@ class GitServiceIntegrationTest {
         assertEquals("test-api-key-123", credentials.get("TEST_SYSTEM_3_REST_API_KEY"));
         assertEquals("ftpuser", credentials.get("TEST_SYSTEM_3_FTP_USERNAME"));
         assertEquals("ftppass", credentials.get("TEST_SYSTEM_3_FTP_PASSWORD"));
-        assertEquals("test-git-token-12345", credentials.get("GIT_TOKEN"));
+        assertEquals("test-git-token-12345", credentials.get("ENVGENE_GIT_REPO_TOKEN"));
         assertEquals("storageuser", credentials.get("STORAGE_USERNAME"));
         assertEquals("storagepass", credentials.get("STORAGE_PASSWORD"));
     }
@@ -300,7 +319,7 @@ class GitServiceIntegrationTest {
     @SuppressWarnings("unchecked")
     private List<YamlSystem> invokeParseSystemsFromDeploymentParams(Map<String, Object> deploymentParams) {
         try {
-            return (List<YamlSystem>) ReflectionTestUtils.invokeMethod(gitService, 
+            return (List<YamlSystem>) ReflectionTestUtils.invokeMethod(gitService,
                     "parseSystemsFromDeploymentParams", deploymentParams);
         } catch (Exception e) {
             throw new RuntimeException(e);
