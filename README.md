@@ -87,15 +87,13 @@ The following parameters are passed to `application.properties` during deploymen
 | `SERVICE_NAME` | `string` | `yes` | `"atp3-tdm-be"` | Deployment Config/Service name. |
 | `LOG_LEVEL` | `string` | `no` | `"INFO"` | Logging level for the application. |
 | `SPRING_PROFILES` | `string` | `no` | `"disable-security"` | Spring profile for security configuration. |
-| `GIT_URL` | `string` | `yes` | `""` | Git repository base URL (e.g., https://git.example.com). |
-| `GIT_TOKEN` | `string` | `yes` | `""` | Access token for private Git repositories. |
-| `GIT_ENVIRONMENTS_REF` | `string` | `no` | `"master"` | Git branch or tag reference for environments configuration. |
-| `GIT_ENVIRONMENTS_PROJECT_PATH` | `string` | `yes` | `""` | Path to the environments project in Git repository. |
-| `GIT_ENVIRONMENTS_TOPOLOGY_PARAMETERS_PATH` | `string` | `no` | `""` | Path to topology parameters file in Git repository. |
-| `GIT_ENVIRONMENTS_PARAMETERS_PATH` | `string` | `no` | `"effective-set/pipeline/qtp-v1.0.schema-parameters.yaml"` | Path to parameters file in Git repository. |
-| `GIT_ENVIRONMENTS_CREDENTIALS_PATH` | `string` | `no` | `"effective-set/pipeline/qtp-v1.0.schema-credentials.yaml"` | Path to credentials file in Git repository. |
-| `GIT_ENVIRONMENTS_DEPLOYMENT_PARAMETERS_PATH` | `string` | `no` | `"/effective-set/deployment/atp/atp3-playwright-runner/values/deployment-parameters.yaml"` | Path to deployment parameters file in Git repository. |
-| `GIT_ENVIRONMENTS_DEPLOYMENT_CREDENTIALS_PATH` | `string` | `no` | `"/effective-set/deployment/atp/atp3-playwright-runner/values/credentials.yaml"` | Path to deployment credentials file in Git repository. |
+| `ENVGENE_GIT_REPO_URL` | `string` | `yes` | `""` | Full Git repository URL including project path (e.g., https://git.netcracker.com/path/to/project). |
+| `ENVGENE_GIT_REPO_TOKEN` | `string` | `yes` | `""` | Access token for private Git repositories. |
+| `ENVGENE_GIT_REPO_BRANCH` | `string` | `no` | `"master"` | Git branch or tag reference for environments configuration. |
+| `ENVGENE_GIT_REPO_DEPLOYMENT_PATH` | `string` | `no` | `"effective-set/deployment"` | Base path to deployment configuration in Git repository. Used to construct full paths to deployment files. |
+| `ENVGENE_GIT_REPO_NC_APP_PATH` | `string` | `no` | `"atp/atp3-playwright-runner"` | Application-specific path within deployment configuration. Used to construct full paths to deployment files. |
+| `ENVGENE_GIT_REPO_CREDENTIALS_PATH` | `string` | `no` | `"values/credentials.yaml"` | Relative path to credentials file within the application deployment path. Combined with `ENVGENE_GIT_REPO_DEPLOYMENT_PATH` and `ENVGENE_GIT_REPO_NC_APP_PATH` to form the full path. |
+| `ENVGENE_GIT_REPO_DEPLOYMENT_PARAMETERS_PATH` | `string` | `no` | `"values/deployment-parameters.yaml"` | Relative path to deployment parameters file within the application deployment path. Combined with `ENVGENE_GIT_REPO_DEPLOYMENT_PATH` and `ENVGENE_GIT_REPO_NC_APP_PATH` to form the full path. |
 | `PROJECTS_INFO` | `json` | `no` | `{}` | JSON object mapping project IDs to project names. |
 | `KEYCLOAK_ENABLED` | `boolean` | `no` | `false` | Enable or disable Keycloak authentication. |
 | `KEYCLOAK_AUTH_URL` | `string` | `no` | `""` | Keycloak authentication server URL. |

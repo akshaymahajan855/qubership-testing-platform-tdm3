@@ -1,10 +1,10 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+  name: '{{ .Values.SERVICE_NAME }}'
   labels:
-    app: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-    name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+    app: '{{ .Values.SERVICE_NAME }}'
+    name: '{{ .Values.SERVICE_NAME }}'
     servicetype: '{{ .Values.SERVICE_TYPE }}'
 spec:
   strategy:
@@ -12,16 +12,16 @@ spec:
   replicas: {{ .Values.REPLICAS }}
   selector:
     matchLabels:
-      name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-      app: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-      deploymentconfig: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+      name: '{{ .Values.SERVICE_NAME }}'
+      app: '{{ .Values.SERVICE_NAME }}'
+      deploymentconfig: '{{ .Values.SERVICE_NAME }}'
       servicetype: '{{ .Values.SERVICE_TYPE }}'
   template:
     metadata:
       labels:
-        name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-        app: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
-        deploymentconfig: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+        name: '{{ .Values.SERVICE_NAME }}'
+        app: '{{ .Values.SERVICE_NAME }}'
+        deploymentconfig: '{{ .Values.SERVICE_NAME }}'
         servicetype: '{{ .Values.SERVICE_TYPE }}'
     spec:
       securityContext:
@@ -35,7 +35,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.SERVICE_NAME }}-pvc
       containers:
-        - name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+        - name: '{{ .Values.SERVICE_NAME }}'
           image: '{{ .Values.DOCKER_TAG }}'
           imagePullPolicy: IfNotPresent
           resources:
@@ -93,8 +93,8 @@ spec:
               protocol: TCP
           env:
             - name: PROJECTS_INFO
-              value: {{ .Values.atp3tdm.projectsInfo | toJson | quote }}
-          {{- include "tdmbe.env.cloud" . | indent 12 }}
+              value: {{ default (dict "b0c1fd9e-19a7-4156-90e0-f04028a58720" "MyProject") .Values.atp3tdm.gitProjectsInfo | toJson | quote }}
+            {{- include "tdmbe.env.cloud" . | indent 12 }}
             - name: CLOUD_NAMESPACE
               valueFrom:
                 fieldRef:

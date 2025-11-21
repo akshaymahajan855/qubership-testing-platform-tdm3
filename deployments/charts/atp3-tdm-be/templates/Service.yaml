@@ -2,7 +2,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+  name: '{{ .Values.SERVICE_NAME }}'
 spec:
   ports:
     - name: web
@@ -12,5 +12,5 @@ spec:
       port: 9000
       protocol: TCP
   selector:
-    name: '{{ .Values.LABEL }}{{ .Values.SERVICE_NAME }}'
+    name: '{{ .Values.SERVICE_NAME }}'
   type: '{{ .Values.SERVICE_PORT_TYPE }}'
