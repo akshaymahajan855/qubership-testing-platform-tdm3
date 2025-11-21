@@ -8,7 +8,7 @@ SPRING_PROFILES: "disable-security"
 SERVICE_NAME: "atp3-tdm-be"
 SERVICE_PORT_TYPE: "ClusterIP"
 # Logging
-GRAYLOG_HOST: "udp:graylog01cn.netcracker.com"
+GRAYLOG_HOST: "udp:graylog-service.example.com"
 GRAYLOG_ON: "true"
 GRAYLOG_PORT: "12201"
 # Profiler
@@ -64,7 +64,7 @@ atp3tdm:
   environmentsCacheDurations: "15"
   environmentsSpringCacheType: "GENERIC"
   eurekaClientEnabled: "false"
-  fromEmailAddress: "ATP-TDM-Tool@NetCracker.com"
+  fromEmailAddress: "tdm-tool-service@example.com"
   identityProviderUrl: ""
   jmxEnable: "true"
   jmxPort: "3000"
