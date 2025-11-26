@@ -63,7 +63,7 @@ public class DataRefreshController /* implements DataRefreshControllerApi */ {
             + "@catalogRepository.findByRefreshConfigId(#id).getProjectId(), 'READ')")
     @AuditAction(auditAction = "Get refresh configuration by id {{#id}}")
     @GetMapping(path = {"/config/{id}"})
-    public ResponseEntity<TestDataRefreshConfig> getRefreshConfig(@PathVariable UUID id) {
+    public ResponseEntity<TestDataRefreshConfig> getRefreshConfig(@PathVariable("id") UUID id) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(dataRefreshService.getRefreshConfig(id));
     }

@@ -64,7 +64,7 @@ public class DataCleanupController /* implements DataCleanupControllerApi */ {
             + "@catalogRepository.findAllByCleanupConfigId(#id).get(0).getProjectId(), 'READ')")
     @AuditAction(auditAction = "Get cleanup configuration by id {{#id}}")
     @GetMapping(path = {"/config/{id}"})
-    public ResponseEntity<CleanupSettings> getCleanupConfig(@PathVariable UUID id) {
+    public ResponseEntity<CleanupSettings> getCleanupConfig(@PathVariable("id") UUID id) {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON)
                 .body(cleanupService.getCleanupSettings(id));
     }
