@@ -16,6 +16,17 @@
 
 package org.qubership.atp.tdm.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.qubership.atp.tdm.AbstractTestDataTest;
 import org.qubership.atp.tdm.exceptions.internal.TdmValidateCronException;
 import org.qubership.atp.tdm.model.TestDataTableCatalog;
@@ -23,19 +34,13 @@ import org.qubership.atp.tdm.model.cleanup.CleanupResults;
 import org.qubership.atp.tdm.model.cleanup.CleanupSettings;
 import org.qubership.atp.tdm.model.cleanup.CleanupType;
 import org.qubership.atp.tdm.model.cleanup.TestDataCleanupConfig;
+import org.qubership.atp.tdm.model.cleanup.cleaner.impl.SqlTestDataCleaner;
+import org.qubership.atp.tdm.model.table.TestDataTable;
+import org.qubership.atp.tdm.model.table.column.TestDataTableColumn;
+import org.qubership.atp.tdm.model.table.column.TestDataTableColumnIdentity;
 import org.qubership.atp.tdm.repo.CleanupConfigRepository;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.*;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 public class CleanupServiceTest extends AbstractTestDataTest {
 
@@ -49,7 +54,6 @@ public class CleanupServiceTest extends AbstractTestDataTest {
     public void setUp() {
         when(environmentsService.getConnectionsSystemById(any(), any())).thenReturn(connections);
     }
-
 
     @Test
     public void cleanupConfig_saveAndGetCleanup_returnNormalCleanup() throws Exception {
@@ -149,7 +153,6 @@ public class CleanupServiceTest extends AbstractTestDataTest {
         TestDataCleanupConfig updatedCleanupConfig = createSqlCleanupConfig(tableNameAtpQa, saveEnvList);
         TestDataCleanupConfig updatedCleanupConfigChanged = createSqlCleanupConfig(tableNameAtpQa, envForUpdate);
 
-
         catalogRepository.deleteByTableName(tableNameAtpUat);
         catalogRepository.deleteByTableName(tableNameAtpDev);
         catalogRepository.deleteByTableName(tableNameAtpQa);
@@ -180,7 +183,6 @@ public class CleanupServiceTest extends AbstractTestDataTest {
             cleanupRepository.deleteAll();
             catalogRepository.deleteByTableName(tableName);
         }
-
     }
 
     @Test
@@ -437,6 +439,55 @@ public class CleanupServiceTest extends AbstractTestDataTest {
         }
     }
 
+    @Test
+    public void checkSqlCleanupQueryParsing_validQuery() {
+        String sqlQuery = "select * from nc_objects where object_id = ${'CUSTOMER_ID'} and"
+                + " (select 24 * (sysdate - (INTERVAL '1' HOUR) - to_date(${'CREATED_WHEN'}, 'YYYY-MM-DD hh24:mi:ss'))"
+                + " from dual) < 24";
+        int queryTimeout = 10000;
+
+        List<String> expectedQueryColumns = new ArrayList<>();
+        expectedQueryColumns.add("CUSTOMER_ID");
+        expectedQueryColumns.add("CREATED_WHEN");
+
+        TestDataTable testDataTable = initTestDataTable();
+
+        SqlTestDataCleaner cleaner = new SqlTestDataCleaner(null, sqlQuery, queryTimeout);
+        List<String> actualQueryColumns = cleaner.collectParameterColumnsList(testDataTable);
+        Assertions.assertArrayEquals(expectedQueryColumns.toArray(), actualQueryColumns.toArray(),
+                "Query parameters placeholders don't match: " + expectedQueryColumns + " vs. "
+                        + actualQueryColumns);
+        boolean isValid = cleaner.parseQuery();
+        Assertions.assertTrue(isValid, "Query (after replacements) is assumed to be valid, but:\n"
+                + cleaner.getQuery());
+    }
+
+    @Test
+    public void checkSqlCleanupQueryParsing_validQuery_repeatedPlaceHolders() {
+        String sqlQuery = "select * from nc_objects where object_id = ${'CUSTOMER_ID'} "
+                + " and "
+                + " (select 24 * (sysdate - (INTERVAL '1' HOUR) - to_date(${'CREATED_WHEN'}, 'YYYY-MM-DD hh24:mi:ss'))"
+                + " from dual) < 24"
+                + " and "
+                + " parent_id != ${'CUSTOMER_ID'}";
+        int queryTimeout = 10000;
+
+        List<String> expectedQueryColumns = new ArrayList<>();
+        expectedQueryColumns.add("CUSTOMER_ID");
+        expectedQueryColumns.add("CREATED_WHEN");
+        expectedQueryColumns.add("CUSTOMER_ID");
+
+        TestDataTable testDataTable = initTestDataTable();
+
+        SqlTestDataCleaner cleaner = new SqlTestDataCleaner(null, sqlQuery, queryTimeout);
+        List<String> actualQueryColumns = cleaner.collectParameterColumnsList(testDataTable);
+        Assertions.assertArrayEquals(expectedQueryColumns.toArray(), actualQueryColumns.toArray(),
+                "Query parameters placeholders don't match: " + expectedQueryColumns + " vs. "
+                        + actualQueryColumns);
+        boolean isValid = cleaner.parseQuery();
+        Assertions.assertTrue(isValid, "Query (after replacements) is assumed to be valid, but:\n"
+                + cleaner.getQuery());
+    }
 
     private CleanupSettings createCleanupSettings(String cron, String tableName) {
         TestDataCleanupConfig cleanupConfig = new TestDataCleanupConfig();
@@ -453,5 +504,24 @@ public class CleanupServiceTest extends AbstractTestDataTest {
         cleanupSettings.setTableName(tableName);
         cleanupSettings.setEnvironmentsList(Collections.singletonList(UUID.randomUUID()));
         return cleanupSettings;
+    }
+
+    private TestDataTableColumn createColumn(String tableName, String columnName) {
+        TestDataTableColumnIdentity columnIdentity = new TestDataTableColumnIdentity();
+        columnIdentity.setTableName(tableName);
+        columnIdentity.setColumnName(columnName);
+        return new TestDataTableColumn(columnIdentity);
+    }
+
+    private TestDataTable initTestDataTable() {
+        TestDataTable testDataTable = new TestDataTable();
+        testDataTable.setName("tdm_test1");
+        testDataTable.setTitle("TDM Test 1");
+        List<TestDataTableColumn> tableColumns = new ArrayList<>();
+        tableColumns.add(createColumn("tdm_test1", "CUSTOMER_ID"));
+        tableColumns.add(createColumn("tdm_test1", "CUSTOMER_TYPE"));
+        tableColumns.add(createColumn("tdm_test1", "CREATED_WHEN"));
+        testDataTable.setColumns(tableColumns);
+        return testDataTable;
     }
 }
