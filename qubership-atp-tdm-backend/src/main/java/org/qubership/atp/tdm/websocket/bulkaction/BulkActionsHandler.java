@@ -127,7 +127,7 @@ public abstract class BulkActionsHandler extends TextWebSocketHandler {
         log.info("Websocket request processing started. Session: [{}]. TextMessage: [{}].", session, message);
         BulkActionConfig config = parseRequest(message);
         log.info("class name : {}", this.getClass().getName());
-        lockManager.executeWithLock(session.getUri().toString() + " " + config.getProjectId(),
+        lockManager.executeWithLock(session.getUri().getPath() + " " + config.getProjectId(),
                 bulkActionDuration, () -> {
                     MDC.clear();
                     MdcUtils.put(MdcField.PROJECT_ID.toString(), config.getProjectId());
