@@ -974,7 +974,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             result.forEach(resultRow -> {
                 String key = String.valueOf(resultRow[0]);
                 if (columnValues.getValues().contains(key)) {
-                    tableStats.getOptions().put(key, ((BigInteger) resultRow[1]).intValue());
+                    tableStats.getOptions().put(key, ((Number) resultRow[1]).intValue());
                 }
             });
             columnValues.getValues().stream().forEach(value -> tableStats.getOptions().putIfAbsent(value, 0));

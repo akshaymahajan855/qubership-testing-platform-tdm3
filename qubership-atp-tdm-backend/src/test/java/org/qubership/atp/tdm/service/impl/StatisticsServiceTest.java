@@ -869,7 +869,6 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
     }
 
     @Test
-    @Disabled
     public void availableStatistic_getNewConfig_getConfig() {
         String tableName = "availabledata_" + java.lang.System.currentTimeMillis();
         UUID system2 = UUID.randomUUID();
@@ -894,7 +893,6 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
     }
 
     @Test
-    @Disabled
     public void availableStatistic_saveConfig_saved() {
         UUID system2 = UUID.randomUUID();
         UUID project = UUID.randomUUID();
@@ -920,7 +918,6 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
     }
 
     @Test
-    @Disabled
     public void availableData_getAvailableData_returnStatistic() {
         UUID system2 = UUID.randomUUID();
         UUID project = UUID.randomUUID();
