@@ -44,7 +44,7 @@ public class SopsDecryptor implements Decryptor {
 
     private static final String SOPS_AGE_KEY_ENV = "SOPS_AGE_KEY";
     private static final String SOPS_COMMAND = "sops";
-    private static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    private static final int DEFAULT_TIMEOUT_SECONDS = 60;
     
     // Pattern to match SOPS metadata: "sops:" at the beginning of a line (with optional whitespace)
     private static final Pattern SOPS_METADATA_PATTERN = Pattern.compile("(?m)^\\s*sops\\s*:");
