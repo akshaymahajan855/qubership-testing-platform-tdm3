@@ -52,6 +52,8 @@ import org.qubership.atp.tdm.env.configurator.model.envgen.YamlConfiguration;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlConnection;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlSystem;
+import org.qubership.atp.tdm.env.configurator.utils.decryptor.Decryptor;
+import org.qubership.atp.tdm.env.configurator.utils.decryptor.SopsDecryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -94,6 +96,7 @@ public class GitService {
 
     private CacheService cacheService;
     private ObjectMapper enfConfObjectMapper;
+    private Optional<Decryptor> decryptor;
     private static final List<String> EXCLUSIONS = Arrays.asList("credentials", "parameters");
 
     {
@@ -103,9 +106,10 @@ public class GitService {
     }
 
     @Autowired
-    public GitService(CacheService cacheService) {
+    public GitService(CacheService cacheService, Optional<Decryptor> decryptor) {
         this.cacheService = cacheService;
-        log.info("GitService constructor called");
+        this.decryptor = decryptor;
+        log.info("GitService constructor called. Decryptor available: {}", decryptor.isPresent());
     }
 
     @PostConstruct
@@ -705,7 +709,37 @@ public class GitService {
     public String getFileContentAsString(String filePath) throws Exception {
         RepositoryFile file = getGitFile(filePath);
         byte[] decodedBytes = Base64.getDecoder().decode(file.getContent());
-        return new String(decodedBytes, StandardCharsets.UTF_8);
+        
+        // Save to temporary file for decryption check
+        File tempFile = File.createTempFile("git_file_", null);
+        try {
+            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                fos.write(decodedBytes);
+            }
+            
+            // Check if file is encrypted and decrypt if needed
+            if (decryptor.isPresent() && decryptor.get() instanceof SopsDecryptor) {
+                SopsDecryptor sopsDecryptor = (SopsDecryptor) decryptor.get();
+                if (sopsDecryptor.isEncrypted(tempFile.toPath())) {
+                    log.debug("File {} is encrypted, attempting to decrypt", filePath);
+                    try {
+                        String decryptedContent = sopsDecryptor.decrypt(tempFile.toPath());
+                        return decryptedContent;
+                    } catch (Exception e) {
+                        log.warn("Failed to decrypt file {}: {}. Returning original content.", filePath, e.getMessage());
+                        // Fall back to original content if decryption fails
+                    }
+                }
+            }
+            
+            // Return original content if not encrypted or decryptor not available
+            return new String(decodedBytes, StandardCharsets.UTF_8);
+        } finally {
+            // Clean up temporary file
+            if (tempFile.exists() && !tempFile.delete()) {
+                log.warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
+            }
+        }
     }
 
     /**

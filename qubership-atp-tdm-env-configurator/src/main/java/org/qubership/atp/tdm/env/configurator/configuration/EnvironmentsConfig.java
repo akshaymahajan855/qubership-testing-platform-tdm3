@@ -23,9 +23,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.qubership.atp.tdm.env.configurator.exceptions.internal.TdmEnvInitiateCacheException;
 import org.qubership.atp.tdm.env.configurator.utils.CacheNames;
+import org.qubership.atp.tdm.env.configurator.utils.decryptor.Decryptor;
+import org.qubership.atp.tdm.env.configurator.utils.decryptor.SopsDecryptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
@@ -45,6 +48,20 @@ public class EnvironmentsConfig {
 
     @Value("${environments.cache.duration:15}")
     private Integer cacheDuration;
+
+    @Value("${envgene.age.private.key:}")
+    private String agePrivateKey;
+
+    /**
+     * Creates SopsDecryptor bean if age private key is configured.
+     * @return SopsDecryptor instance or null if key is not configured
+     */
+    @Bean
+    @ConditionalOnExpression("!'${envgene.age.private.key:}'.isEmpty()")
+    public Decryptor sopsDecryptor() {
+        log.info("Initializing SopsDecryptor with age private key from configuration");
+        return new SopsDecryptor(agePrivateKey);
+    }
 
     /**
      * Cache manager.
