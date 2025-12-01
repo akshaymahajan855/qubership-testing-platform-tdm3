@@ -69,13 +69,13 @@ public abstract class BulkActionsHandler extends TextWebSocketHandler {
     protected final TdmMdcHelper mdcHelper;
     private final ExecutorService executorService;
     private final AbstractBulkActionMailSender mailSender;
+
     @Value("${atp.lock.bulk.action.duration.sec}")
     private int bulkActionDuration;
 
     /**
      * Constructor with parameters.
      */
-
     public BulkActionsHandler(@Qualifier("websocket") ExecutorService executorService,
                               @Nonnull CatalogRepository catalogRepository,
                               @Nonnull EnvironmentsService environmentsService,

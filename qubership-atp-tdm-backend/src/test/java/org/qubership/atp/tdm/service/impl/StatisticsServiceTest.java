@@ -16,28 +16,40 @@
 
 package org.qubership.atp.tdm.service.impl;
 
-import org.junit.jupiter.api.Disabled;
-import org.qubership.atp.tdm.AbstractTestDataTest;
-import org.qubership.atp.tdm.env.configurator.model.System;
-import org.qubership.atp.tdm.env.configurator.model.*;
-import org.qubership.atp.tdm.model.ProjectInformation;
-import org.qubership.atp.tdm.model.mail.charts.ChartSeries;
-import org.qubership.atp.tdm.model.statistics.available.AvailableDataByColumnStats;
-import org.qubership.atp.tdm.model.statistics.report.StatisticsReportElement;
-import org.qubership.atp.tdm.model.statistics.report.StatisticsReportEnvironment;
-import org.qubership.atp.tdm.model.statistics.report.StatisticsReportObject;
-import org.qubership.atp.tdm.model.statistics.report.UsersStatisticsReportElement;
-import org.qubership.atp.tdm.model.statistics.report.UsersStatisticsReportObject;
-import org.qubership.atp.tdm.model.table.TableColumnValues;
-import org.qubership.atp.tdm.model.table.TestDataTable;
-import org.qubership.atp.tdm.repo.TestAvailableDataMonitoringRepository;
-import org.qubership.atp.tdm.repo.TestDataUsersMonitoringRepository;
-import org.qubership.atp.tdm.utils.DataUtils;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.apache.commons.lang3.StringUtils;
-
+import org.qubership.atp.tdm.AbstractTestDataTest;
+import org.qubership.atp.tdm.env.configurator.model.Connection;
+import org.qubership.atp.tdm.env.configurator.model.LazyEnvironment;
+import org.qubership.atp.tdm.env.configurator.model.LazyProject;
+import org.qubership.atp.tdm.env.configurator.model.LazySystem;
+import org.qubership.atp.tdm.env.configurator.model.Project;
+import org.qubership.atp.tdm.env.configurator.model.System;
+import org.qubership.atp.tdm.model.ProjectInformation;
+import org.qubership.atp.tdm.model.mail.charts.ChartSeries;
 import org.qubership.atp.tdm.model.statistics.AvailableDataStatisticsConfig;
 import org.qubership.atp.tdm.model.statistics.ConsumedStatistics;
 import org.qubership.atp.tdm.model.statistics.ConsumedStatisticsItem;
@@ -52,25 +64,21 @@ import org.qubership.atp.tdm.model.statistics.TestDataTableUsersMonitoring;
 import org.qubership.atp.tdm.model.statistics.UserGeneralStatisticsItem;
 import org.qubership.atp.tdm.model.statistics.UsersOccupyStatisticRequest;
 import org.qubership.atp.tdm.model.statistics.UsersOccupyStatisticResponse;
+import org.qubership.atp.tdm.model.statistics.available.AvailableDataByColumnStats;
+import org.qubership.atp.tdm.model.statistics.report.StatisticsReportElement;
+import org.qubership.atp.tdm.model.statistics.report.StatisticsReportEnvironment;
+import org.qubership.atp.tdm.model.statistics.report.StatisticsReportObject;
+import org.qubership.atp.tdm.model.statistics.report.UsersStatisticsReportElement;
+import org.qubership.atp.tdm.model.statistics.report.UsersStatisticsReportObject;
+import org.qubership.atp.tdm.model.table.TableColumnValues;
+import org.qubership.atp.tdm.model.table.TestDataTable;
+import org.qubership.atp.tdm.repo.TestAvailableDataMonitoringRepository;
+import org.qubership.atp.tdm.repo.TestDataUsersMonitoringRepository;
 import org.qubership.atp.tdm.utils.AvailableStatisticUtils;
+import org.qubership.atp.tdm.utils.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.jdbc.Sql;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @Sql({"/scripts.sql"})
 public class StatisticsServiceTest extends AbstractTestDataTest {
@@ -83,7 +91,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
     private static final String DEFAULT_ASSIGNMENT = "across all";
     private static final String TABLE_NAME_FIRST = "test_table_statistic_availability_first";
     private static final String TABLE_NAME_SECOND = "test_table_statistic_availability_second";
-    private String cron = "0 0 9 ? * *";
+    private final String cron = "0 0 9 ? * *";
 
     private static final UUID systemIdSecond = UUID.randomUUID();
     private static final UUID environmentIdSecond = UUID.randomUUID();
@@ -119,7 +127,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
     private static final Project project = new Project() {{
         setName("Test Statistics Project");
         setId(projectId);
-        setEnvironments(Arrays.asList(environment));
+        setEnvironments(Collections.singletonList(environment));
     }};
 
     private UsersOccupyStatisticRequest usersOccupyStatisticRequest;
@@ -409,9 +417,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
                 actualStatistics.get(0).getDetails().stream()
                         .sorted(Comparator.comparingLong(GeneralStatisticsItem::getOccupied))
                         .collect(Collectors.toList());
-        actualStatistics.forEach(x -> {
-            x.setDetails(details);
-        });
+        actualStatistics.forEach(x -> x.setDetails(details));
 
         Assertions.assertEquals(expectedStatistics, actualStatistics);
     }
@@ -774,7 +780,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
         mockEnvForStatistics();
         UsersOccupyStatisticResponse respone = statisticsService.getOccupiedDataByUsers(usersOccupyStatisticRequest);
 
-        Assertions.assertEquals(respone.getRecords(), 2);
+        Assertions.assertEquals(2, respone.getRecords());
     }
 
     @Test
@@ -783,7 +789,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
         mockEnvForStatistics();
         UsersOccupyStatisticResponse response = statisticsService.getOccupiedDataByUsers(usersOccupyStatisticRequest);
 
-        Assertions.assertEquals(response.getData().get(0).getContext(), "Test Data");
+        Assertions.assertEquals("Test Data", response.getData().get(0).getContext());
     }
 
     @Test
@@ -792,7 +798,7 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
         mockEnvForStatistics();
         UsersOccupyStatisticResponse response = statisticsService.getOccupiedDataByUsers(usersOccupyStatisticRequest);
 
-        Assertions.assertEquals(response.getData().get(1).getUserName(), "TestUser");
+        Assertions.assertEquals("TestUser", response.getData().get(1).getUserName());
     }
 
     @Test
@@ -849,7 +855,8 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
         createEmptyMonitoringConfig();
         TestAvailableDataMonitoring config = createMonitoringConfig();
         statisticsService.saveAvailableDataMonitoringConfig(config);
-        TestAvailableDataMonitoring savedConfig = statisticsService.getAvailableDataMonitoringConfig(config.getSystemId(), config.getEnvironmentId());
+        TestAvailableDataMonitoring savedConfig = statisticsService
+                .getAvailableDataMonitoringConfig(config.getSystemId(), config.getEnvironmentId());
 
         Assertions.assertEquals(config, savedConfig);
     }
@@ -861,7 +868,8 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
         TestAvailableDataMonitoring config = createMonitoringConfig();
         statisticsService.saveAvailableDataMonitoringConfig(config);
         statisticsService.deleteAvailableDataMonitoringConfig(systemId, environmentId);
-        TestAvailableDataMonitoring configFromDb = statisticsService.getAvailableDataMonitoringConfig(systemId, environmentId);
+        TestAvailableDataMonitoring configFromDb = statisticsService
+                .getAvailableDataMonitoringConfig(systemId, environmentId);
 
         Assertions.assertTrue(StringUtils.isEmpty(configFromDb.getRecipients()));
         Assertions.assertTrue(StringUtils.isEmpty(configFromDb.getSchedule()));
@@ -884,8 +892,6 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
             Assertions.assertNull(config.getDescription());
             Assertions.assertNull(config.getActiveColumnKey());
             Assertions.assertNull(config.getTablesColumns());
-        } catch (Exception e) {
-            throw e;
         } finally {
             deleteTestDataTableIfExists(tableName);
             catalogRepository.deleteByTableName(tableName);
@@ -909,8 +915,6 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
             AvailableDataStatisticsConfig actConfig = statisticsService.getAvailableStatsConfig(system2, environmentId);
 
             Assertions.assertEquals(config, actConfig);
-        } catch (Exception e) {
-            throw e;
         } finally {
             deleteTestDataTableIfExists(tableName);
             catalogRepository.deleteByTableName(tableName);
@@ -929,14 +933,12 @@ public class StatisticsServiceTest extends AbstractTestDataTest {
             List<TableColumnValues> values = testDataService.getDistinctTablesColumnValues(system2, environmentId, "sim");
             values.get(0).getValues().add("Empty stat");
             config.setTablesColumns(values);
-            config.setDescription("Descirption");
+            config.setDescription("Description");
             config.setActiveColumnKey("sim");
             statisticsService.saveAvailableStatsConfig(config);
             AvailableDataByColumnStats stats = statisticsService.getAvailableDataInColumn(system2, environmentId);
 
-            Assertions.assertEquals(new Integer(0), stats.getStatistics().get(0).getOptions().get("Empty stat"));
-        } catch (Exception e) {
-            throw e;
+            Assertions.assertEquals(Integer.valueOf(0), stats.getStatistics().get(0).getOptions().get("Empty stat"));
         } finally {
             deleteTestDataTableIfExists(tableName);
             catalogRepository.deleteByTableName(tableName);

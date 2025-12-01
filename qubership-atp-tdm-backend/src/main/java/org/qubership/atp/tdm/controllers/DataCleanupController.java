@@ -71,6 +71,10 @@ public class DataCleanupController /* implements DataCleanupControllerApi */ {
 
     /**
      * Save / update data cleanup settings.
+     *
+     * @param cleanupConfig CleanupSettings object to be saved
+     * @return CleanupSettings object after saving
+     * @throws Exception in case errors while settings saving.
      */
     @Operation(description = "Save / update data cleanup settings.")
     @PreAuthorize("@entityAccess.checkAccess("
@@ -85,6 +89,10 @@ public class DataCleanupController /* implements DataCleanupControllerApi */ {
 
     /**
      * Force run data cleanup.
+     *
+     * @param cleanupConfig CleanupSettings object to run cleanup
+     * @return List of CleanupResults produced by cleanup run
+     * @throws Exception in case errors while cleanup running.
      */
     @Operation(description = "Force run data cleanup.")
     @PreAuthorize("@entityAccess.checkAccess("
@@ -98,9 +106,10 @@ public class DataCleanupController /* implements DataCleanupControllerApi */ {
 
     /**
      * Get next run's date / time details.
+     *
      * @param cronExpression cron expression to calculate next run based on
-     * @return ResponseMessage that contains the details
-     * @throws ParseException Thrown in case if invalid cron expression was provided
+     * @return ResponseEntity of String message that contains details
+     * @throws ParseException Thrown in case if invalid cron expression was provided.
      */
     @Operation(description = "Get next run's date / time details.")
     @AuditAction(auditAction = "Get next run's date. cron {{#cronExpression}}")

@@ -31,6 +31,7 @@
         <svn.revision>local_build</svn.revision>
         <model.mapper.version>3.2.0</model.mapper.version>
         <springfox.version>3.0.0</springfox.version>
+        <xalan.version>2.7.3</xalan.version>
 
         <atp.crypt.version>0.0.23</atp.crypt.version>
         <atp.integration.spring.boot.starter.version>0.2.41</atp.integration.spring.boot.starter.version>
@@ -290,6 +291,16 @@
                 <groupId>org.modelmapper</groupId>
                 <artifactId>modelmapper</artifactId>
                 <version>${model.mapper.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xalan</groupId>
+                <artifactId>xalan</artifactId>
+                <version>${xalan.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xalan</groupId>
+                <artifactId>serializer</artifactId>
+                <version>${xalan.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

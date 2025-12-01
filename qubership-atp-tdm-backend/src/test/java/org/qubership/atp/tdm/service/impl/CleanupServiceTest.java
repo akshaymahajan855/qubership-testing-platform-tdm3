@@ -496,8 +496,7 @@ public class CleanupServiceTest extends AbstractTestDataTest {
         cleanupConfig.setShared(false);
         cleanupConfig.setQueryTimeout(30);
         cleanupConfig.setType(CleanupType.SQL);
-        cleanupConfig.setSearchSql("select * from test_data_table_catalog where table_title = "
-                + "${'Partner'}");
+        cleanupConfig.setSearchSql("select * from test_data_table_catalog where table_title = ${'Partner'}");
         cleanupConfig.setShared(false);
         CleanupSettings cleanupSettings = new CleanupSettings();
         cleanupSettings.setTestDataCleanupConfig(cleanupConfig);
@@ -514,13 +513,14 @@ public class CleanupServiceTest extends AbstractTestDataTest {
     }
 
     private TestDataTable initTestDataTable() {
+        String tableName = "tdm_test1";
         TestDataTable testDataTable = new TestDataTable();
-        testDataTable.setName("tdm_test1");
+        testDataTable.setName(tableName);
         testDataTable.setTitle("TDM Test 1");
         List<TestDataTableColumn> tableColumns = new ArrayList<>();
-        tableColumns.add(createColumn("tdm_test1", "CUSTOMER_ID"));
-        tableColumns.add(createColumn("tdm_test1", "CUSTOMER_TYPE"));
-        tableColumns.add(createColumn("tdm_test1", "CREATED_WHEN"));
+        tableColumns.add(createColumn(tableName, "CUSTOMER_ID"));
+        tableColumns.add(createColumn(tableName, "CUSTOMER_TYPE"));
+        tableColumns.add(createColumn(tableName, "CREATED_WHEN"));
         testDataTable.setColumns(tableColumns);
         return testDataTable;
     }

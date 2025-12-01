@@ -107,7 +107,8 @@ public class SqlTestDataCleaner implements TestDataCleaner {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             log.info("Cleanup query: {}", query);
             for (Map<String, Object> row : rows) {
-                log.debug("Processing row #{}", row.get("ROW_ID"));
+                Object rowId = row.get("ROW_ID");
+                log.debug("Processing row #{}", rowId);
                 for (int i = 0; i < columns.size(); i++) {
                     String columnName = columns.get(i);
                     preparedStatement.setString(i + 1,
@@ -120,10 +121,10 @@ public class SqlTestDataCleaner implements TestDataCleaner {
                         })
                         .get(queryTimeout, TimeUnit.SECONDS)) {
                     if (!rs.next()) {
-                        log.debug("Row with id: {} will be marked for deleting", row.get("ROW_ID"));
+                        log.debug("Row with id: {} will be marked for deleting", rowId);
                         rowsToBeDeleted.add(row);
                     } else {
-                        log.debug("Row with id: {} will be skipped", row.get("ROW_ID"));
+                        log.debug("Row with id: {} will be skipped", rowId);
                     }
                 } catch (TimeoutException e) {
                     throw new TimeoutException("SQL execution has been stopped as maximum time of execution in "
@@ -131,9 +132,8 @@ public class SqlTestDataCleaner implements TestDataCleaner {
                 } catch (SQLSyntaxErrorException e) {
                     throw new SQLSyntaxErrorException("Incorrect SQL syntax.", e);
                 } catch (Exception e) {
-                    log.error(String.format(TdmDeleteRowException.DEFAULT_MESSAGE,
-                            row.get("ROW_ID"), testDataTable.getName()), e);
-                    throw new TdmDeleteRowException(row.get("ROW_ID").toString(), testDataTable.getName());
+                    log.error(String.format(TdmDeleteRowException.DEFAULT_MESSAGE, rowId, testDataTable.getName()), e);
+                    throw new TdmDeleteRowException(rowId.toString(), testDataTable.getName());
                 }
             }
             return rowsToBeDeleted;
@@ -141,13 +141,12 @@ public class SqlTestDataCleaner implements TestDataCleaner {
     }
 
     public List<String> collectParameterColumnsList(@Nonnull TestDataTable testDataTable) {
+        log.info("Original cleanup query: {}", query);
         Matcher m = COLUMN_PATTERN.matcher(query);
         List<String> columns = new ArrayList<>();
         String target;
         String column;
         int index;
-
-        log.info("Original cleanup query: {}", query);
 
         /*
             catch and replace column placeholders to build a PreparedStatement

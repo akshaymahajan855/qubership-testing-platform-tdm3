@@ -24,7 +24,6 @@ import static org.qubership.atp.tdm.utils.TestDataQueries.GET_COUNT_OF_ROWS;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.text.ParseException;
 import java.time.LocalDate;
@@ -186,7 +185,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<GeneralStatisticsItem> data = statisticsRepository.getTestDataAvailability(catalogList, projectId);
         setEnvironmentsNames(projectId, data);
         if (Objects.nonNull(systemId)) {
-            log.info("Test data availability successfully received.");
+            log.info("Test data availability of {} system is successfully received.", systemId);
             return data;
         } else {
             List<GeneralStatisticsItem> listItems = new ArrayList<>();
@@ -211,7 +210,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 item.setDetails(details);
                 listItems.add(item);
             });
-            log.info("Test data availability successfully received.");
+            log.info("Test data availability of all systems is successfully received.");
             return listItems;
         }
     }
@@ -287,7 +286,7 @@ public class StatisticsServiceImpl implements StatisticsService {
     public OutdatedStatistics getTestDataConsumptionWhitOutdated(@Nonnull UUID projectId, @Nullable UUID systemId,
                                                                  @Nonnull LocalDate dateFrom, @Nonnull LocalDate dateTo,
                                                                  int expirationDate) {
-        log.info("Get consumed test data for project: {}, system: {}, from: {}, to: {}",
+        log.info("Get consumed (with outdated info) test data for project: {}, system: {}, from: {}, to: {}",
                 projectId, systemId, dateFrom, dateTo);
         List<OutdatedStatisticsItem> listItems = new ArrayList<>();
         List<TestDataTableCatalog> catalogList = Objects.nonNull(systemId)
@@ -326,7 +325,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             });
             data.setItems(listItems);
         }
-        log.info("Test data consumption successfully received.");
+        log.info("Test data consumption (with outdated info) successfully received.");
         return data;
     }
 
@@ -453,7 +452,8 @@ public class StatisticsServiceImpl implements StatisticsService {
         List<String> environments = reportStatistics.stream().map(StatisticsReport::getEnvironment).distinct()
                 .collect(Collectors.toList());
         environments.forEach(env -> {
-            List<String> filterSystem = reportStatistics.stream().filter(el -> env.equals(el.getEnvironment()))
+            List<String> filterSystem = reportStatistics.stream()
+                    .filter(el -> env.equals(el.getEnvironment()))
                     .map(StatisticsReport::getSystem)
                     .distinct()
                     .collect(Collectors.toList());
@@ -535,7 +535,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private void fillCreatedWhenStatistics(@Nonnull String tableName, @Nonnull TestDataTableCatalog catalog,
                                            @Nonnull TestDataTable testDataTable) {
-        log.info("Save created when statistics for table:[{}]", tableName);
+        log.info("Save created when statistics for table: [{}]", tableName);
         List<TestDataOccupyStatistic> statistics = testDataTable.getData().stream()
                 .map(row -> {
                     LocalDateTime createdWhen = LocalDateTime.parse(String.valueOf(row.get(SystemColumns.CREATED_WHEN
@@ -547,7 +547,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 })
                 .collect(Collectors.toList());
         occupyStatisticRepository.saveAll(statistics);
-        log.info("Created when statistics for table:[{}] successfully saved.", tableName);
+        log.info("Created when statistics for table: [{}] successfully saved.", tableName);
     }
 
     private TestDataTable getCreatedWhenTestDataInfo(@Nonnull String tableName) {
@@ -687,7 +687,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .build();
         schedulerService.reschedule(job, monitoringItem, SCHEDULE_USERS_GROUP);
         String triggerStatus = monitoringItem.isEnabled() ? "ON" : "OFF";
-        log.info("Job for project {} and group {} has been scheduled. Trigger status:{}",
+        log.info("Job for project {} and group {} has been scheduled. Trigger status: {}",
                 monitoringItem.getProjectId(), SCHEDULE_USERS_GROUP, triggerStatus);
     }
 
@@ -700,7 +700,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .build();
         schedulerService.reschedule(job, monitoringItem, SCHEDULE_AVAILABLE_DATA_GROUP, identityName);
         String triggerStatus = monitoringItem.isScheduled() ? "ON" : "OFF";
-        log.info("Job with identity name {} and group {} has been scheduled. Trigger status:{}",
+        log.info("Job with identity name {} and group {} has been scheduled. Trigger status: {}",
                 identityName, SCHEDULE_AVAILABLE_DATA_GROUP, triggerStatus);
     }
 
@@ -716,7 +716,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .build();
         schedulerService.reschedule(job, monitoringItem, SCHEDULE_GROUP);
         String triggerStatus = monitoringItem.isEnabled() ? "ON" : "OFF";
-        log.info("Job for project {} and group {} has been scheduled. Trigger status:{}",
+        log.info("Job for project {} and group {} has been scheduled. Trigger status: {}",
                 monitoringItem.getProjectId(), SCHEDULE_GROUP, triggerStatus);
     }
 
@@ -786,9 +786,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 String environmentName = "Not found";
                 try {
                     tableValue.setSystem(
-                            environmentsService.getLazySystemById(
-                                            tableTemp.getEnvironmentId(), tableTemp.getSystemId()
-                                    )
+                            environmentsService
+                                    .getLazySystemById(tableTemp.getEnvironmentId(), tableTemp.getSystemId())
                                     .getName()
                     );
                 } catch (Exception e) {
@@ -837,11 +836,9 @@ public class StatisticsServiceImpl implements StatisticsService {
             csvHeader.append(datesString).append(",\n");
             fileWriter.write(csvHeader.toString());
             for (OccupiedDataByUsersStatistics table : response.getData()) {
-                SortedSet<LocalDate> keys = new TreeSet<LocalDate>(table.getData().keySet());
+                SortedSet<LocalDate> keys = new TreeSet<>(table.getData().keySet());
                 StringBuilder valuesString = new StringBuilder();
-                keys.forEach(date -> {
-                    valuesString.append(table.getData().get(date)).append(",");
-                });
+                keys.forEach(date -> valuesString.append(table.getData().get(date)).append(","));
 
                 StringBuilder build = new StringBuilder();
                 build
