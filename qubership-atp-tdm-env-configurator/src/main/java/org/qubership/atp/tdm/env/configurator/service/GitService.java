@@ -711,7 +711,7 @@ public class GitService {
         byte[] decodedBytes = Base64.getDecoder().decode(file.getContent());
         
         // Save to temporary file for decryption check
-        File tempFile = File.createTempFile("git_file_", null);
+        File tempFile = File.createTempFile("git_file_", ".yaml");
         try {
             try (FileOutputStream fos = new FileOutputStream(tempFile)) {
                 fos.write(decodedBytes);
