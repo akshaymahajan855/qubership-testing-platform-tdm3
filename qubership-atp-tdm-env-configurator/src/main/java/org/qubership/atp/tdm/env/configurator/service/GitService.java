@@ -57,13 +57,13 @@ import org.qubership.atp.tdm.env.configurator.utils.decryptor.SopsDecryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -274,8 +274,8 @@ public class GitService {
                             .name(yamlEnv.getName())
                             .clusterName(yamlEnv.getClusterName())
                             .projectId(projectId)
-                            .systems(yamlEnv.getYamlSystems() != null ? 
-                                yamlEnv.getYamlSystems().stream()
+                            .systems(yamlEnv.getYamlSystems() != null
+                                    ? yamlEnv.getYamlSystems().stream()
                                     .map(system -> UUID.nameUUIDFromBytes(String.format("%s/%s",
                                             yamlEnv.getName(), system.getName()).getBytes()).toString())
                                     .collect(Collectors.toList()) : new ArrayList<>())
@@ -619,7 +619,8 @@ public class GitService {
     }
 
     /**
-     * Get all files from specified directory in Git repository
+     * Get all files from specified directory in Git repository.
+     *
      * @param directoryPath path to directory in repository (e.g., "environments" or "environments/cluster1")
      * @return list of files in directory
      * @throws Exception if error occurred while getting files
@@ -651,7 +652,8 @@ public class GitService {
     }
 
     /**
-     * Get all files with recursive directory traversal
+     * Get all files with recursive directory traversal.
+     *
      * @param directoryPath path to directory in repository
      * @return list of all files in directory and subdirectories
      * @throws Exception if error occurred while getting files
@@ -683,7 +685,8 @@ public class GitService {
     }
 
     /**
-     * Get list of all files in repository (names and paths only)
+     * Get list of all files in repository (names and paths only).
+     *
      * @param directoryPath path to directory (empty string for repository root)
      * @return list of file tree elements
      * @throws Exception if error occurred while getting file list
@@ -701,7 +704,8 @@ public class GitService {
     }
 
     /**
-     * Get file content as string
+     * Get file content as string.
+     *
      * @param filePath path to file in repository
      * @return file content as string
      * @throws Exception if error occurred while getting file
@@ -709,41 +713,39 @@ public class GitService {
     public String getFileContentAsString(String filePath) throws Exception {
         RepositoryFile file = getGitFile(filePath);
         byte[] decodedBytes = Base64.getDecoder().decode(file.getContent());
-        
-        // Save to temporary file for decryption check
-        File tempFile = File.createTempFile("git_file_", ".yaml");
-        try {
-            try (FileOutputStream fos = new FileOutputStream(tempFile)) {
-                fos.write(decodedBytes);
-            }
-            
-            // Check if file is encrypted and decrypt if needed
-            if (decryptor.isPresent() && decryptor.get() instanceof SopsDecryptor) {
+
+        if (decryptor.isPresent() && decryptor.get() instanceof SopsDecryptor) {
+            File tempFile = File.createTempFile("git_file_", ".yaml");
+            try {
+                try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+                    fos.write(decodedBytes);
+                }
+
+                // Check if file is encrypted and decrypt if needed
                 SopsDecryptor sopsDecryptor = (SopsDecryptor) decryptor.get();
                 if (sopsDecryptor.isEncrypted(tempFile.toPath())) {
                     log.debug("File {} is encrypted, attempting to decrypt", filePath);
                     try {
-                        String decryptedContent = sopsDecryptor.decrypt(tempFile.toPath());
-                        return decryptedContent;
-                    } catch (Exception e) {
-                        log.warn("Failed to decrypt file {}: {}. Returning original content.", filePath, e.getMessage());
-                        // Fall back to original content if decryption fails
+                        return sopsDecryptor.decrypt(tempFile.toPath());
+                    } catch (Exception exception) {
+                        log.warn(String.format("Restoring original content due to file %s decryption failure",
+                                filePath), exception);
                     }
                 }
-            }
-            
-            // Return original content if not encrypted or decryptor not available
-            return new String(decodedBytes, StandardCharsets.UTF_8);
-        } finally {
-            // Clean up temporary file
-            if (tempFile.exists() && !tempFile.delete()) {
-                log.warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
+            } finally {
+                // Clean up temporary file
+                if (tempFile.exists() && !tempFile.delete()) {
+                    log.warn("Failed to delete temporary file: {}", tempFile.getAbsolutePath());
+                }
             }
         }
+
+        return new String(decodedBytes, StandardCharsets.UTF_8);
     }
 
     /**
-     * Get all directory names in specified directory, excluding EXCLUSIONS
+     * Get all directory names in specified directory, excluding EXCLUSIONS.
+     *
      * @param directoryPath path to directory in repository
      * @return list of directory names
      * @throws Exception if error occurred while getting directories
@@ -762,12 +764,12 @@ public class GitService {
                     }
                 }
             }
-        } catch (GitLabApiException e) {
-            log.error("Error getting directories from: {}", directoryPath, e);
-            throw e;
-        } catch (Exception e) {
-            log.error("Error working with Git API", e);
-            throw e;
+        } catch (GitLabApiException gitLabApiException) {
+            log.error(String.format("Error getting directories from: %s", directoryPath), gitLabApiException);
+            throw gitLabApiException;
+        } catch (Exception exception) {
+            log.error("Error working with Git API", exception);
+            throw exception;
         }
         return directoryNames;
     }
@@ -846,7 +848,8 @@ public class GitService {
     }
 
     /**
-     * Parse systems and connections from deployment-parameters.yaml file using ObjectMapper
+     * Parse systems and connections from deployment-parameters.yaml file using ObjectMapper.
+     *
      * @param deploymentParams parsed YAML content as Map
      * @return list of YamlSystem objects
      */
@@ -873,14 +876,14 @@ public class GitService {
                                 for (Map<String, Object> connectionMap : connectionsList) {
                                     for (Map.Entry<String, Object> connectionEntry : connectionMap.entrySet()) {
                                         String connectionType = connectionEntry.getKey();
-                                        Map<String, Object> connectionData =
-                                                (Map<String, Object>) connectionEntry.getValue();
                                         
                                         YamlConnection yamlConnection = new YamlConnection();
                                         yamlConnection.setId(UUID.randomUUID());
                                         yamlConnection.setName(connectionType);
                                         yamlConnection.setType(ConnectionType.fromValue(connectionType));
-                                        
+
+                                        Map<String, Object> connectionData =
+                                                (Map<String, Object>) connectionEntry.getValue();
                                         Map<String, String> parameters = new HashMap<>();
                                         for (Map.Entry<String, Object> paramEntry : connectionData.entrySet()) {
                                             if (paramEntry.getValue() != null) {
@@ -911,7 +914,8 @@ public class GitService {
     }
 
     /**
-     * Merge two lists of systems, combining connections for systems with the same name
+     * Merge two lists of systems, combining connections for systems with the same name.
+     *
      * @param existingSystems existing systems list
      * @param newSystems new systems to merge
      * @return merged systems list
@@ -954,7 +958,8 @@ public class GitService {
     }
 
     /**
-     * Safely builds a path by joining path segments, handling slashes correctly
+     * Safely builds a path by joining path segments, handling slashes correctly.
+     *
      * @param basePath the base path
      * @param additionalPath the additional path to append
      * @return the combined path as a string
@@ -967,8 +972,8 @@ public class GitService {
             return basePath;
         }
         
-        String normalizedAdditional = additionalPath.startsWith("/") ?
-                additionalPath.substring(1) : additionalPath;
+        String normalizedAdditional = additionalPath.startsWith("/")
+                ? additionalPath.substring(1) : additionalPath;
 
         Path base = Paths.get(basePath);
         Path additional = Paths.get(normalizedAdditional);
@@ -978,7 +983,8 @@ public class GitService {
     }
 
     /**
-     * Safely builds a path by joining multiple path segments, handling slashes correctly
+     * Safely builds a path by joining multiple path segments, handling slashes correctly.
+     *
      * @param paths variable number of path segments to join
      * @return the combined path as a string
      */

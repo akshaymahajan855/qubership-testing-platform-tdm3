@@ -35,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Decryptor for SOPS-encrypted files using age encryption.
+ *
  * <p>
  * This decryptor uses SOPS CLI to decrypt files that were encrypted with SOPS using age keys.
  * The private key must be provided during construction.
