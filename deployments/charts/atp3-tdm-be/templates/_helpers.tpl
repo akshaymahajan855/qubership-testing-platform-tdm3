@@ -90,7 +90,6 @@ FEIGN_CONNECT_TIMEOUT: {{ .Values.FEIGN_CONNECT_TIMEOUT | int | quote }}
 FEIGN_READ_TIMEOUT: {{ .Values.FEIGN_READ_TIMEOUT | int | quote }}
 FROM_EMAIL_ADDRESS: "{{ .Values.atp3tdm.fromEmailAddress }}"
 
-ENVGENE_AGE_PRIVATE_KEY: "{{ .Values.ENVGENE_AGE_PRIVATE_KEY }}"
 ENVGENE_GIT_REPO_URL: "{{ .Values.ENVGENE_GIT_REPO_URL }}"
 ENVGENE_GIT_REPO_BRANCH: "{{ .Values.ENVGENE_GIT_REPO_BRANCH }}"
 ENVGENE_GIT_REPO_DEPLOYMENT_PATH: "{{ .Values.ENVGENE_GIT_REPO_DEPLOYMENT_PATH }}"
@@ -143,6 +142,7 @@ TDM_DB_USER: "{{ include "tdmbe.env.default" (dict "ctx" . "val" .Values.atp3tdm
 KEYCLOAK_CLIENT_NAME: "{{ default "atp-tdm" .Values.atp3tdm.keycloakClientName }}"
 KEYCLOAK_SECRET: "{{ default "10870611-a4a4-4ad1-acaa-b587f54ead40" .Values.atp3tdm.keycloakSecret }}"
 ENVGENE_GIT_REPO_TOKEN: "{{ .Values.ENVGENE_GIT_REPO_TOKEN }}"
+ENVGENE_AGE_PRIVATE_KEY: "{{ .Values.ENVGENE_AGE_PRIVATE_KEY }}"
 {{- end }}
 
 {{- define "tdmbe.env.deploy" }}

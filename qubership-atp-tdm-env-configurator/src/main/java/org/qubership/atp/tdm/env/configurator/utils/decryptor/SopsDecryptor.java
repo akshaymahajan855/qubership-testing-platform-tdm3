@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
-import lombok.extern.slf4j.Slf4j;
-
 import org.qubership.atp.tdm.env.configurator.exceptions.internal.TdmEnvDecryptionException;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Decryptor for SOPS-encrypted files using age encryption.
@@ -165,7 +165,8 @@ public class SopsDecryptor implements Decryptor {
      * @throws InterruptedException if the process is interrupted
      * @throws TdmEnvDecryptionException if decryption fails
      */
-    private String executeSopsDecrypt(Path filePath) throws IOException, InterruptedException, TdmEnvDecryptionException {
+    private String executeSopsDecrypt(Path filePath)
+            throws IOException, InterruptedException, TdmEnvDecryptionException {
         List<String> command = new ArrayList<>();
         command.add(SOPS_COMMAND);
         command.add("--decrypt");
@@ -234,20 +235,7 @@ public class SopsDecryptor implements Decryptor {
         int exitCode = process.exitValue();
 
         if (exitCode != 0) {
-            String errorMessage = errorOutput.length() > 0
-                    ? errorOutput.toString()
-                    : output.toString();
-
-            // Handle specific SOPS error cases
-            if (errorMessage.contains("metadata not found")) {
-                throw new TdmEnvDecryptionException(
-                        "File is not encrypted or already decrypted: " + filePath);
-            }
-
-            if (errorMessage.contains("no decryption key")) {
-                throw new TdmEnvDecryptionException(
-                        "No valid decryption key found. Check that the age private key is correctly configured.");
-            }
+            String errorMessage = getErrorMessage(filePath, errorOutput, output);
 
             throw new TdmEnvDecryptionException(
                     String.format("SOPS decryption failed with exit code %d: %s", exitCode, errorMessage));
@@ -257,5 +245,23 @@ public class SopsDecryptor implements Decryptor {
         log.debug("Successfully decrypted file: {}", filePath);
 
         return decryptedContent;
+    }
+
+    private static String getErrorMessage(Path filePath, StringBuilder errorOutput, StringBuilder output) {
+        String errorMessage = errorOutput.length() > 0
+                ? errorOutput.toString()
+                : output.toString();
+
+        // Handle specific SOPS error cases
+        if (errorMessage.contains("metadata not found")) {
+            throw new TdmEnvDecryptionException(
+                    "File is not encrypted or already decrypted: " + filePath);
+        }
+
+        if (errorMessage.contains("no decryption key")) {
+            throw new TdmEnvDecryptionException(
+                    "No valid decryption key found. Check that the age private key is correctly configured.");
+        }
+        return errorMessage;
     }
 }
