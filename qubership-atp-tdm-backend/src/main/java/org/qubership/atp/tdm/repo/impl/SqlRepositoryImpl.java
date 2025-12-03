@@ -72,8 +72,8 @@ public class SqlRepositoryImpl implements SqlRepository {
         String dbType = server.getProperty("db_type");
         getDbDriverName(dbType);
         String jdbcUrl = server.getProperty("jdbc_url");
-        String dbLogin = server.getProperty("db_login");
-        String dbPassword = server.getProperty("db_password");
+        String dbLogin = server.getProperty("login");
+        String dbPassword = server.getProperty("password");
         String connectionString = createConnectionString(dbType, server);
         validateConnectionString(connectionString);
         if (Strings.isNullOrEmpty(jdbcUrl)) {
@@ -122,10 +122,10 @@ public class SqlRepositoryImpl implements SqlRepository {
             if (server.getProperty("jdbc_url").isEmpty()) {
                 String jdbcUrl = createConnectionString(dbType, server);
                 jdbcTemplate = new JdbcTemplate(createDataSource(dbDriverName, jdbcUrl,
-                        server.getProperty("db_login"), server.getProperty("db_password")));
+                        server.getProperty("login"), server.getProperty("password")));
             } else {
                 jdbcTemplate = new JdbcTemplate(createDataSource(dbDriverName, server.getProperty("jdbc_url"),
-                        server.getProperty("db_login"), server.getProperty("db_password")));
+                        server.getProperty("login"), server.getProperty("password")));
             }
             return jdbcTemplate;
         } catch (Exception e) {

@@ -101,8 +101,8 @@ public abstract class AbstractTestDataTest extends AbstractTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("db_type", "postgresql");
         parameters.put("jdbc_url", "jdbc:h2:file:./database/atptdm");
-        parameters.put("db_login", "tdmadmin");
-        parameters.put("db_password", "tdmadmin");
+        parameters.put("login", "tdmadmin");
+        parameters.put("password", "tdmadmin");
         setParameters(parameters);
     }};
 
@@ -111,8 +111,8 @@ public abstract class AbstractTestDataTest extends AbstractTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("db_type", "errorType");
         parameters.put("jdbc_url", "jdbc:h2:file:./database/atptdm");
-        parameters.put("db_login", "tdmadmin");
-        parameters.put("db_password", "tdmadmin");
+        parameters.put("login", "tdmadmin");
+        parameters.put("password", "tdmadmin");
         setParameters(parameters);
     }};
 
@@ -121,8 +121,8 @@ public abstract class AbstractTestDataTest extends AbstractTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("db_type", "postgresql");
         parameters.put("jdbc_url", "jdbc:h2:file:./database/atptdm");
-        parameters.put("db_login", "tdmadmin");
-        parameters.put("db_password", "tdmadmin");
+        parameters.put("login", "tdmadmin");
+        parameters.put("password", "tdmadmin");
         setParameters(parameters);
     }};
 
@@ -131,8 +131,8 @@ public abstract class AbstractTestDataTest extends AbstractTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("db_type", "postgresql");
         parameters.put("jdbc_url", "jdbc:h2:file:./database/atptdm");
-        parameters.put("db_login", "incorrect");
-        parameters.put("db_password", "incorrect");
+        parameters.put("login", "incorrect");
+        parameters.put("password", "incorrect");
         setParameters(parameters);
     }};
 
