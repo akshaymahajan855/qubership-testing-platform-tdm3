@@ -55,7 +55,7 @@ jobs:
 
       - name: Metadata
         id: metadata
-        uses: netcracker/qubership-workflow-hub/actions/metadata-action@b6d2198c722564e250d985a99990230d85b0d686 #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@v2.0.4 #v2.0.3
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
