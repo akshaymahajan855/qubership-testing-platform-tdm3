@@ -51,16 +51,16 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
       - name: Metadata
         id: metadata
-        uses: netcracker/qubership-workflow-hub/actions/metadata-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
       - name: Build and Publish Docker Image For Environments
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           ref: ${{ github.ref }}
           dry-run: false
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish Docker Image For Transfer
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@9319676b7d20b423a2e0943a0ac08da07d615998 #v1.0.6
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           ref: ${{ github.ref }}
           dry-run: false
