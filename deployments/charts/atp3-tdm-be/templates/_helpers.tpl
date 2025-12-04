@@ -142,6 +142,7 @@ TDM_DB_USER: "{{ include "tdmbe.env.default" (dict "ctx" . "val" .Values.atp3tdm
 KEYCLOAK_CLIENT_NAME: "{{ default "atp-tdm" .Values.atp3tdm.keycloakClientName }}"
 KEYCLOAK_SECRET: "{{ default "10870611-a4a4-4ad1-acaa-b587f54ead40" .Values.atp3tdm.keycloakSecret }}"
 ENVGENE_GIT_REPO_TOKEN: "{{ .Values.ENVGENE_GIT_REPO_TOKEN }}"
+ENVGENE_AGE_PRIVATE_KEY: "{{ .Values.ENVGENE_AGE_PRIVATE_KEY }}"
 {{- end }}
 
 {{- define "tdmbe.env.deploy" }}

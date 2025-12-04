@@ -55,12 +55,12 @@ jobs:
 
       - name: Metadata
         id: metadata
-        uses: netcracker/qubership-workflow-hub/actions/metadata-action@b6d2198c722564e250d985a99990230d85b0d686 #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
       - name: Build and Publish Docker Image For Environments
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@b6d2198c722564e250d985a99990230d85b0d686 #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           ref: ${{ github.ref }}
           dry-run: false
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish Docker Image For Transfer
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@b6d2198c722564e250d985a99990230d85b0d686 #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@3e428f45132119ce49d90f3770a45d4fe1d1078d #v2.0.4
         with:
           ref: ${{ github.ref }}
           dry-run: false

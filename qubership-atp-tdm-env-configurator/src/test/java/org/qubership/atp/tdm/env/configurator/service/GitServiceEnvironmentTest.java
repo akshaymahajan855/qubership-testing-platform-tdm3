@@ -19,6 +19,7 @@ package org.qubership.atp.tdm.env.configurator.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -30,17 +31,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.envgen.YamlSystem;
+import org.qubership.atp.tdm.env.configurator.utils.decryptor.SopsDecryptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,14 +54,19 @@ class GitServiceEnvironmentTest {
     @Mock
     private CacheService cacheService;
 
-    @InjectMocks
     private GitService gitService;
+
+    private SopsDecryptor mockDecryptor;
 
     private ObjectMapper yamlMapper;
     private String testDeploymentParamsContent;
 
     @BeforeEach
     void setUp() throws IOException {
+        // Create a mock decryptor first and then create GitService with it
+        mockDecryptor = mock(SopsDecryptor.class);
+        gitService = new GitService(cacheService, Optional.of(mockDecryptor));
+
         // Initialize YAML mapper
         yamlMapper = new YAMLMapper();
         yamlMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);

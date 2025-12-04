@@ -27,6 +27,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/v3.21/community/" >/etc/apk/repo
         net-tools=2.10-r3 \
         nss_wrapper=1.1.12-r1 \
         procps-ng=4.0.4-r2 \
+        sops=3.9.1-r5 \
         sysstat=12.7.6-r0 \
         tcpdump=4.99.5-r0 \
         wget=1.25.0-r0 \
