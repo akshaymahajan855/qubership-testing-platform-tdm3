@@ -68,6 +68,7 @@ jobs:
           download-artifact: true
           custom-image-name: qubership-testing-platform-tdm3
           download-artifact-path: build-context
+          download-artifact-name: qubership-testing-platform-tdm3
           component: '[{"name": "qubership-testing-platform-tdm3", "file": "./Dockerfile", "context": "."}]'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
