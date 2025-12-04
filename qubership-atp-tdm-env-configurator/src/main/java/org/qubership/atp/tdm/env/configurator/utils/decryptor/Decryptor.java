@@ -34,7 +34,6 @@ public interface Decryptor {
      * @param encryptedFilePath path to the encrypted file
      * @return decrypted content as a string
      * @throws TdmEnvDecryptionException if decryption fails
-     * @throws IllegalArgumentException if the file path is null or invalid
      */
     String decrypt(Path encryptedFilePath) throws TdmEnvDecryptionException;
 }
