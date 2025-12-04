@@ -51,7 +51,6 @@
         <url>scm:git:https://github.com/Netcracker/qubership-testing-platform-tdm3.git</url>
         <tag>HEAD</tag>
     </scm>
-
     <profiles>
         <profile>
             <id>central</id>
