@@ -60,7 +60,7 @@ jobs:
           default-template: '{{ref-name}}-{{timestamp}}'
 
       - name: Build and Publish Docker Image For Environments
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@499-bug-error-during-build #v2.0.3
         with:
           ref: ${{ github.ref }}
           dry-run: false
@@ -73,7 +73,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish Docker Image For Transfer
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@main #v2.0.3
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@499-bug-error-during-build #v2.0.3
         with:
           ref: ${{ github.ref }}
           dry-run: false
