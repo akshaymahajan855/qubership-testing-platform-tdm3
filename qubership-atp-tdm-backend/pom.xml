@@ -43,46 +43,50 @@
                     <artifactId>tomcat-embed-core</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-io</artifactId>
                     <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>HdrHistogram</artifactId>
                     <groupId>org.hdrhistogram</groupId>
+                    <artifactId>HdrHistogram</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>antlr-runtime</artifactId>
                     <groupId>org.antlr</groupId>
+                    <artifactId>antlr-runtime</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-configuration</artifactId>
                     <groupId>commons-configuration</groupId>
+                    <artifactId>commons-configuration</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-lang</artifactId>
                     <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-collections</artifactId>
                     <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>qubership-atp-common-logging</artifactId>
                     <groupId>org.qubership.atp.common</groupId>
+                    <artifactId>qubership-atp-common-logging</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>jersey-client</artifactId>
                     <groupId>com.sun.jersey</groupId>
+                    <artifactId>jersey-client</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>jsr311-api</artifactId>
                     <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>at.yawk.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -95,8 +99,8 @@
             <version>2.17.1</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>log4j-api</artifactId>
                     <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -117,20 +121,20 @@
                     <artifactId>spring-web</artifactId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk15on</artifactId>
-                    <groupId>org.bouncycastle</groupId>
                 </exclusion>
                 <exclusion>
+                    <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk15on</artifactId>
-                    <groupId>org.bouncycastle</groupId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>jaxb-api</artifactId>
                     <groupId>javax.xml.bind</groupId>
+                    <artifactId>jaxb-api</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>qubership-atp-common-logging</artifactId>
                     <groupId>org.qubership.atp.common</groupId>
+                    <artifactId>qubership-atp-common-logging</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -158,8 +162,8 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
                     <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-jdbc</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -168,8 +172,8 @@
             <artifactId>atp-crypt</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>commons-lang</artifactId>
                     <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -212,16 +216,16 @@
             <version>2.0.0</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>javassist</artifactId>
                     <groupId>org.javassist</groupId>
+                    <artifactId>javassist</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>objenesis</artifactId>
                     <groupId>org.objenesis</groupId>
+                    <artifactId>objenesis</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>mockito-core</artifactId>
                     <groupId>org.mockito</groupId>
+                    <artifactId>mockito-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -239,7 +243,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-configuration2</artifactId>
-            <version>2.9.0</version>
+            <version>2.10.1</version>
         </dependency>
         <dependency>
             <groupId>com.jcraft</groupId>
@@ -260,12 +264,12 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-io</artifactId>
                     <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>commons-compress</artifactId>
                     <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>xalan</groupId>
@@ -294,8 +298,8 @@
             <artifactId>jersey-apache-connector</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>jersey-client</artifactId>
                     <groupId>org.glassfish.jersey.core</groupId>
+                    <artifactId>jersey-client</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -318,8 +322,8 @@
                     <artifactId>tomcat-embed-core</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>log4j-api</artifactId>
                     <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
@@ -345,8 +349,8 @@
             <scope>test</scope>
             <exclusions>
                 <exclusion>
-                    <artifactId>spring-test</artifactId>
                     <groupId>org.springframework</groupId>
+                    <artifactId>spring-test</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.mockito</groupId>
@@ -392,12 +396,12 @@
             <artifactId>guava</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>checker-qual</artifactId>
                     <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>error_prone_annotations</artifactId>
                     <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -411,8 +415,8 @@
             <version>3.6.0</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>asm</artifactId>
                     <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -474,8 +478,8 @@
             <version>5.4.0</version>
             <exclusions>
                 <exclusion>
-                    <artifactId>commons-collections4</artifactId>
                     <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-collections4</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -504,8 +508,8 @@
             <artifactId>postgresql</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>checker-qual</artifactId>
                     <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -529,8 +533,6 @@
             <artifactId>kotlin-stdlib-common</artifactId>
             <version>1.6.21</version>
         </dependency>
-
-
         <dependency>
             <groupId>com.mchange</groupId>
             <artifactId>c3p0</artifactId>
@@ -546,7 +548,6 @@
             <artifactId>commons-csv</artifactId>
             <version>1.7</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
@@ -555,7 +556,6 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -586,8 +586,8 @@
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>clover</artifactId>
                     <groupId>org.openclover</groupId>
+                    <artifactId>clover</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -1005,7 +1005,7 @@
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>3.3.4</version>
+                        <version>3.3.11</version>
                         <executions>
                             <execution>
                                 <goals>
