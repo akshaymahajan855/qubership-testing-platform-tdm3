@@ -10,29 +10,29 @@ ENV JDBC_URL=jdbc:h2:file:./database/atptdm;
 
 WORKDIR $HOME_EX
 
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/community/" >/etc/apk/repositories && \
-    echo "https://dl-cdn.alpinelinux.org/alpine/v3.22/main/" >>/etc/apk/repositories && \
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/v3.23/community/" >/etc/apk/repositories && \
+    echo "https://dl-cdn.alpinelinux.org/alpine/v3.23/main/" >>/etc/apk/repositories && \
     apk add --update --no-cache --no-check-certificate \
-        bash=5.2.37-r0 \
-        curl=8.14.1-r2 \
+        bash=5.3.3-r1 \
+        curl=8.17.0-r1 \
         font-dejavu=2.37-r6 \
-        fontconfig=2.15.0-r3 \
+        fontconfig=2.17.1-r0 \
         gcompat=1.1.0-r4 \
-        gettext=0.24.1-r0 \
-        git=2.49.1-r0 \
-        htop=3.4.1-r0 \
+        gettext=0.24.1-r1 \
+        git=2.52.0-r0 \
+        htop=3.4.1-r1 \
         jq=1.8.1-r0 \
-        libpng=1.6.51-r0 \
+        libpng=1.6.53-r0 \
         libcrypto3=3.5.4-r0 \
         libssl3=3.5.4-r0 \
         net-tools=2.10-r3 \
         nss_wrapper=1.1.12-r1 \
-        pcre2=10.46-r0 \
-        procps-ng=4.0.4-r3 \
-        sops=3.9.4-r10 \
-        sysstat=12.7.6-r1 \
+        pcre2=10.47-r0 \
+        procps-ng=4.0.5-r0 \
+        sops=3.11.0-r1 \
+        sysstat=12.7.8-r0 \
         tcpdump=4.99.5-r1 \
-        wget=1.25.0-r1 \
+        wget=1.25.0-r2 \
         xz-libs=5.8.1-r0 \
         zip=3.0-r13 && \
       rm -rf /var/cache/apk/*
