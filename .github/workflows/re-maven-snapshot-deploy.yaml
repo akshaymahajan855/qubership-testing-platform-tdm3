@@ -103,7 +103,7 @@ jobs:
           echo "ADDITIONAL_MVN_ARGS=${ADDITIONAL_MVN_ARGS}" >> $GITHUB_ENV
 
       - name: Cache local Maven repository
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb
         with:
           path: ~/.m2/repository
           key: maven-${{ runner.os }}
@@ -140,7 +140,7 @@ jobs:
 
       - name: Upload all Maven target directories
         if: ${{ inputs.target-store == 'maven-central' }}
-        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: qubership-testing-platform-tdm3
           path: '**/target'
