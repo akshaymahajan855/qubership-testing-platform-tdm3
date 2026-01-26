@@ -31,27 +31,86 @@ permissions:
 
 env:
   TAG_NAME: ${{ github.event.release.tag_name || github.ref }}
+  additional-mvn-args: ""
 
 jobs:
   mvn-snapshot-deploy:
-    uses: ./.github/workflows/re-maven-snapshot-deploy.yaml
-    with:
-      java-version: "21"
-      additional-mvn-args: ""
-      target-store: "maven-central"
-    secrets:
-      maven-username: ${{ secrets.MAVEN_USER }}
-      maven-token: ${{ secrets.MAVEN_PASSWORD }}
-      gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-      gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Maven Docker build
+        id: maven_build
+        uses: netcracker/qubership-workflow-hub/actions/maven-snapshot-deploy@9538833017019ab6bbc2138d3034778dfe3a5d1f # v2.0.6
+        with:
+          java-version: "21"
+          additional-mvn-args: ${{ env.additional-mvn-args }}
+          target-store: "github"
+          upload-artifact: 'true'
+          maven-username: ${{ github.ACTOR }}
+          maven-token: ${{ secrets.GITHUB_TOKEN }}
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ${{ secrets.GPG-PASSPHRASE }}
+
+  load-docker-build-components:
+    runs-on: ubuntu-latest
+    outputs:
+      component: ${{ steps.load_component.outputs.components }}
+      platforms: ${{ steps.load_component.outputs.platforms }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          persist-credentials: false
+
+      - name: Load Docker Configuration
+        id: load_component
+        run:  |
+          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-build-config.json" | jq '
+          def verify_structure:
+          .components as $components
+          | .platforms as $platforms
+          | ($components | type == "array")
+          and (all($components[]; has("name") and has("file") and has("context")))
+          and ($platforms | type == "string");
+          verify_structure
+          | if . then true else false end
+          ')
+          if [ ${verify} == 'true' ]; then
+            echo "✅ $GITHUB_WORKSPACE/.github/docker-build-config.json file is valid"
+            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-build-config.json")
+            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-build-config.json")
+          else
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-build-config.json file is invalid"
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-build-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "components=${components}" >> $GITHUB_OUTPUT
+          echo "platforms=${platforms}" >> $GITHUB_OUTPUT
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: mvn-snapshot-deploy
-
+    strategy:
+      fail-fast: false
+      matrix:
+        component: ${{ fromJson(needs.load-docker-build-components.outputs.component) }}
+    needs: [ mvn-snapshot-deploy, load-docker-build-components ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+
+      - name: Replace slash in service branch
+        id: replace_slash
+        run: |
+          if [[ -n "$GITHUB_HEAD_REF" ]]; then
+            service_branch="$GITHUB_HEAD_REF"
+          else
+            service_branch="$GITHUB_REF_NAME"
+          fi
+          service_branch="${service_branch//\//_}"
+          echo "Branch is: $service_branch"
+          echo "SERVICE_BRANCH=$service_branch" >> $GITHUB_ENV
 
       - name: Metadata
         id: metadata
@@ -59,27 +118,32 @@ jobs:
         with:
           default-template: '{{ref-name}}-{{timestamp}}'
 
-      - name: Build and Publish Docker Image For Environments
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@c1a5c8c2d9c2a79f548134db1d095f36ee0f28e7 #v2.0.7
+      - name: Build and Publish Docker Image
+        id: docker_build
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@396774180000abdb825cbf150b56cc59c6913db8 #v2.0.5
         with:
           ref: ${{ github.ref }}
           dry-run: false
-          tags: ${{steps.metadata.outputs.result}}
+          tags: ${{steps.metadata.outputs.result}}, ${{ env.SERVICE_BRANCH }}_latest
           download-artifact: true
-          custom-image-name: qubership-testing-platform-tdm3
           download-artifact-path: build-context
-          component: '[{"name": "qubership-testing-platform-tdm3", "file": "./Dockerfile", "context": "."}]'
+          component: ${{ toJson(matrix.component) }}
+          platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Publish Docker Image For Transfer
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@c1a5c8c2d9c2a79f548134db1d095f36ee0f28e7 #v2.0.7
-        with:
-          ref: ${{ github.ref }}
-          dry-run: false
-          tags: ${{steps.metadata.outputs.result}}
-          download-artifact: false
-          custom-image-name: qubership-testing-platform-tdm3-transfer
-          component: '[{"name": "qubership-testing-platform-tdm3-transfer", "file": "docker-transfer/Dockerfile", "context": "."}]'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  run-tests:
+    needs: [ build-and-push ]
+    if: |
+      needs.build-and-push.result == 'success' &&
+      (
+        github.event_name == 'pull_request' ||
+        (github.event_name == 'push' && github.ref == 'refs/heads/main')
+      )
+    uses: netcracker/qubership-testing-platform-helm-hook-helper/.github/workflows/deploy-run-tests.yaml@test
+    with:
+      repository_name: 'qubership-testing-platform-tdm3'
+      service_name: 'atp3-tdm-be'
+      namespace: 'tdm3'
+      pipeline_branch: 'test_workflow'
+      enable_test: enable

@@ -1,0 +1,16 @@
+# Which docker image should be used to deploy
+DOCKER_TAG: ""
+# This option turns on or off logging in graylog
+GRAYLOG_ON: "false"
+keepHookLogs: true
+HELPER_IMAGE: "ghcr.io/netcracker/qubership-testing-platform-helm-hook-helper:main_latest"
+MEM_ARGS: "-XX:MaxRAMPercentage=75.0"
+MEMORY_REQUEST: "512Mi"
+MEMORY_LIMIT: "1Gi"
+MAX_RAM: "1024m"
+CPU_REQUEST: "0.05"
+CPU_LIMIT: "0.5"
+REPLICAS: 1
+CLOUD_PUBLIC_HOST: "kuber.cloud"
+atp3tdm:
+  storageClassName: "standard"

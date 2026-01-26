@@ -1,0 +1,14 @@
+{
+  "name": "Localhost TDM",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "enabled": true
+    }
+  ],
+  "timestamp": 0,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-07-28T00:00:00Z",
+  "_postman_exported_using": "Postman/10.x"
+}
