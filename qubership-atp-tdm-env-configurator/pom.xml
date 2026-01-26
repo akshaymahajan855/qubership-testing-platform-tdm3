@@ -4,7 +4,7 @@
     <parent>
         <artifactId>qubership-atp-tdm-parent-java</artifactId>
         <groupId>org.qubership.atp.tdm3</groupId>
-        <version>1.0.6-SNAPSHOT</version>
+        <version>1.0.6</version>
         <relativePath>../parent/qubership-atp-tdm-parent-java/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
