@@ -145,5 +145,5 @@ jobs:
       repository_name: 'qubership-testing-platform-tdm3'
       service_name: 'atp3-tdm-be'
       namespace: 'tdm3'
-      pipeline_branch: 'test_workflow'
+      pipeline_branch: 'main'
       enable_test: enable
