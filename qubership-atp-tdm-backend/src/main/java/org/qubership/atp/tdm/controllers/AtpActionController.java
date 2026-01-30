@@ -18,8 +18,10 @@ package org.qubership.atp.tdm.controllers;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.qubership.atp.integration.configuration.configuration.AuditAction;
 import org.qubership.atp.tdm.model.rest.ResponseMessage;
+import org.qubership.atp.tdm.model.rest.ResponseType;
 import org.qubership.atp.tdm.model.rest.requests.RestApiRequest;
 import org.qubership.atp.tdm.service.AtpActionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,5 +180,25 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     public List<ResponseMessage> runCleanupForTable(@RequestBody RestApiRequest request) {
         return service.runCleanupForTable(request.getProjectName(), request.getEnvName(), request.getSystemName(),
                 request.getTitleTable());
+    }
+
+    @Operation(description = "ATP Action. Resolves Table Name based on environment and table title.")
+    @AuditAction(auditAction = "ATP Action. Returns Table name based on {{#request.titleTable}}.")
+    @PostMapping(value = "/resolve-table")
+    public ResponseMessage resolveTableName(@RequestBody RestApiRequest request) {
+        if (StringUtils.isBlank(request.getProjectName())) {
+            return new ResponseMessage(ResponseType.ERROR, "Project name is missed");
+        }
+        if (StringUtils.isBlank(request.getEnvName())) {
+            return new ResponseMessage(ResponseType.ERROR, "Environment name is missed");
+        }
+        if (StringUtils.isBlank(request.getSystemName())) {
+            return new ResponseMessage(ResponseType.ERROR, "System name is missed");
+        }
+        if (StringUtils.isBlank(request.getTitleTable())) {
+            return new ResponseMessage(ResponseType.ERROR, "Title table name is missed");
+        }
+        return service.resolveTableName(request.getProjectName(), request.getEnvName(),
+                request.getSystemName(), request.getTitleTable());
     }
 }
