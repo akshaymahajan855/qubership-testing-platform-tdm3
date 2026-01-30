@@ -23,7 +23,6 @@ import org.qubership.atp.tdm.model.cleanup.TestDataCleanupConfig;
 import org.qubership.atp.tdm.model.rest.ApiDataFilter;
 import org.qubership.atp.tdm.model.rest.ResponseMessage;
 import org.qubership.atp.tdm.model.rest.ResponseType;
-import org.qubership.atp.tdm.model.rest.requests.*;
 import org.qubership.atp.tdm.model.table.TestDataTable;
 import org.qubership.atp.tdm.model.table.TestDataTableFilter;
 import org.qubership.atp.tdm.service.AtpActionService;
@@ -408,7 +407,7 @@ public class AtpActionServiceTest extends AbstractTestDataTest {
     }
 
     @Test
-    public void atpOccupyTestDataFullRow_wrongTable_tableWasNotFoundErrorMessage() throws IOException {
+    public void atpOccupyTestDataFullRow_wrongTable_tableWasNotFoundErrorMessage() {
         String tableTitle = "Wrong Table Title";
         List<ResponseMessage> responseMessages = atpActionService.occupyTestDataFullRow(lazyProject.getName(),
                 lazyEnvironment.getName(), system.getName(), tableTitle, Collections.emptyList());
@@ -1247,6 +1246,60 @@ public class AtpActionServiceTest extends AbstractTestDataTest {
 
         Assertions.assertEquals(expectedResponseMessage, releaseResponseMessage.getContent());
         Assertions.assertEquals(ResponseType.SUCCESS, responseMessage.getType());
+    }
+
+    @Test
+    public void resolveTableName_catalogRowExists_success() {
+        String tableTitle = "TDM API Test Resolve Table Name";
+        String tableName = "tdm_api_test_resolve_table_name";
+        createTestDataTableCatalog(projectId, systemId, environmentId, tableTitle, tableName);
+
+        ResponseMessage responseMessage = atpActionService.resolveTableName(lazyProject.getName(),
+                lazyEnvironment.getName(), system.getName(), tableTitle);
+
+        catalogRepository.deleteByTableName(tableName);
+
+        Assertions.assertEquals(ResponseType.SUCCESS, responseMessage.getType());
+        Assertions.assertEquals(tableName, responseMessage.getContent());
+    }
+
+    @Test
+    public void resolveTableName_catalogRowNotFound_error() {
+        String tableTitle = "TDM API Test Resolve Table Name - Not Found";
+
+        ResponseMessage responseMessage = atpActionService.resolveTableName(lazyProject.getName(),
+                lazyEnvironment.getName(), system.getName(), tableTitle);
+
+        Assertions.assertEquals(ResponseType.ERROR, responseMessage.getType());
+        Assertions.assertEquals(String.format("Table with title \"%s\" was not found!", tableTitle),
+                responseMessage.getContent());
+    }
+
+    @Test
+    public void resolveTableName_missingEnvName_validationError() {
+        ResponseMessage responseMessage = atpActionService.resolveTableName(lazyProject.getName(),
+                "   ", system.getName(), "someTitle");
+
+        Assertions.assertEquals(ResponseType.ERROR, responseMessage.getType());
+        Assertions.assertEquals("Environment name is missed", responseMessage.getContent());
+    }
+
+    @Test
+    public void resolveTableName_missingSystemName_validationError() {
+        ResponseMessage responseMessage = atpActionService.resolveTableName(lazyProject.getName(),
+                lazyEnvironment.getName(), "", "someTitle");
+
+        Assertions.assertEquals(ResponseType.ERROR, responseMessage.getType());
+        Assertions.assertEquals("System name is missed", responseMessage.getContent());
+    }
+
+    @Test
+    public void resolveTableName_missingTitleTable_validationError() {
+        ResponseMessage responseMessage = atpActionService.resolveTableName(lazyProject.getName(),
+                lazyEnvironment.getName(), system.getName(), " ");
+
+        Assertions.assertEquals(ResponseType.ERROR, responseMessage.getType());
+        Assertions.assertEquals("Title table name is missed", responseMessage.getContent());
     }
 
 }

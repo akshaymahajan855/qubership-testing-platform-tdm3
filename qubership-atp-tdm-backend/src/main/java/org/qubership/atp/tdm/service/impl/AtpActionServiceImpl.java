@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang.StringUtils;
 import org.qubership.atp.tdm.env.configurator.model.LazyEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.LazyProject;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
@@ -213,6 +214,33 @@ public class AtpActionServiceImpl implements AtpActionService {
                 systemName);
         return repository.runCleanupForTable(environmentContext.getProjectId(),
                 environmentContext.getSystemId(), tableTitle);
+    }
+
+    @Override
+    public ResponseMessage resolveTableName(@Nonnull String projectName, @Nonnull String envName,
+                                            @Nonnull String systemName, @Nonnull String tableTitle) {
+
+        if (StringUtils.isBlank(projectName)) {
+            return new ResponseMessage(ResponseType.ERROR, "Project name is missed");
+        }
+        if (StringUtils.isBlank(envName)) {
+            return new ResponseMessage(ResponseType.ERROR, "Environment name is missed");
+        }
+        if (StringUtils.isBlank(systemName)) {
+            return new ResponseMessage(ResponseType.ERROR, "System name is missed");
+        }
+        if (StringUtils.isBlank(tableTitle)) {
+            return new ResponseMessage(ResponseType.ERROR, "Title table name is missed");
+        }
+
+        log.info("ATP Action. Getting table name based on Table Title: {}", tableTitle);
+        EnvironmentContext environmentContext = getEnvironmentContext(projectName, envName, systemName);
+        if (environmentContext.getSystemId() == null) {
+            return new ResponseMessage(ResponseType.ERROR,
+                    String.format("System was not resolved for env=\"%s\", system=\"%s\".", envName, systemName));
+        }
+        return repository.resolveTableName(environmentContext.getProjectId(), environmentContext.getSystemId(),
+                tableTitle);
     }
 
     private EnvironmentContext getEnvironmentContext(@Nonnull String projectName, @Nullable String envName,

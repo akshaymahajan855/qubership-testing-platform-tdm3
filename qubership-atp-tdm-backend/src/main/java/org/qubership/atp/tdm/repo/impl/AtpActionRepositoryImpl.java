@@ -592,6 +592,17 @@ public class AtpActionRepositoryImpl implements AtpActionRepository {
         return Collections.singletonList(new ResponseMessage(ResponseType.SUCCESS, message));
     }
 
+    @Override
+    public ResponseMessage resolveTableName(@Nonnull UUID projectId, @Nonnull UUID systemId,
+                                            @Nonnull String tableTitle) {
+        return Optional.ofNullable(
+                catalogRepository.findByProjectIdAndSystemIdAndTableTitle(projectId, systemId, tableTitle))
+                .map(table -> new ResponseMessage(ResponseType.SUCCESS, table.getTableName()))
+                .orElse(new ResponseMessage(ResponseType.ERROR,
+                        String.format("Table with title \"%s\" was not found!", tableTitle))
+                );
+    }
+
     private String formResultLink(UUID projectId, UUID environmentId, UUID systemId, String tdmUrl) {
         return String.format(DATA_REFRESH_LINK, tdmUrl, projectId, environmentId, systemId);
     }
