@@ -72,4 +72,6 @@ public interface AtpActionRepository {
 
     List<ResponseMessage> runCleanupForTable(@Nonnull UUID projectId, @Nullable UUID systemId,
                                            @Nonnull String tableTitle);
+
+    ResponseMessage resolveTableName(@Nonnull UUID projectId, @Nonnull UUID systemId, @Nonnull String tableTitle);
 }

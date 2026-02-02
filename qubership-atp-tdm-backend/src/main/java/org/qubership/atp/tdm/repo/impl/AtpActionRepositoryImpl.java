@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.common.lock.LockManager;
 import org.qubership.atp.tdm.exceptions.internal.TdmOccupyDataIncorrectlyException;
 import org.qubership.atp.tdm.exceptions.internal.TdmOccupyDataResponseMessageException;
@@ -574,7 +574,7 @@ public class AtpActionRepositoryImpl implements AtpActionRepository {
                 cleanupConfigRepository.findById(tableCatalog.getCleanupConfigId())
                         .orElseThrow(() ->
                                 new TdmSearchCleanupConfigException(tableCatalog.getCleanupConfigId().toString()));
-        CleanupResults cleanupResults = null;
+        CleanupResults cleanupResults;
         try {
             cleanupResults = cleanupService.runCleanup(tableCatalog.getTableName(), cleanupConfigId);
             testDataTableRepository.updateLastUsage(tableCatalog.getTableName());
@@ -590,6 +590,17 @@ public class AtpActionRepositoryImpl implements AtpActionRepository {
                 cleanupResults.getRecordsRemoved());
         log.info(message);
         return Collections.singletonList(new ResponseMessage(ResponseType.SUCCESS, message));
+    }
+
+    @Override
+    public ResponseMessage resolveTableName(@Nonnull UUID projectId, @Nonnull UUID systemId,
+                                            @Nonnull String tableTitle) {
+        return Optional.ofNullable(
+                catalogRepository.findByProjectIdAndSystemIdAndTableTitle(projectId, systemId, tableTitle))
+                .map(table -> new ResponseMessage(ResponseType.SUCCESS, table.getTableName()))
+                .orElse(new ResponseMessage(ResponseType.ERROR,
+                        String.format("Table with title \"%s\" was not found!", tableTitle))
+                );
     }
 
     private String formResultLink(UUID projectId, UUID environmentId, UUID systemId, String tdmUrl) {
