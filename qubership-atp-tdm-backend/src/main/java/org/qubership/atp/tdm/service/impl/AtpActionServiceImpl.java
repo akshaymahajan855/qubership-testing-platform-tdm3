@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.jetbrains.annotations.NotNull;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.tdm.env.configurator.model.LazyEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.LazyProject;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
@@ -232,15 +232,13 @@ public class AtpActionServiceImpl implements AtpActionService {
         if (StringUtils.isBlank(tableTitle)) {
             return new ResponseMessage(ResponseType.ERROR, "Title table name is missed");
         }
-
         log.info("ATP Action. Getting table name based on Table Title: {}", tableTitle);
-        EnvironmentContext environmentContext = getEnvironmentContext(projectName, envName, systemName);
-        if (environmentContext.getSystemId() == null) {
+        EnvironmentContext envContext = getEnvironmentContext(projectName, envName, systemName);
+        if (envContext.getSystemId() == null) {
             return new ResponseMessage(ResponseType.ERROR,
                     String.format("System was not resolved for env=\"%s\", system=\"%s\".", envName, systemName));
         }
-        return repository.resolveTableName(environmentContext.getProjectId(), environmentContext.getSystemId(),
-                tableTitle);
+        return repository.resolveTableName(envContext.getProjectId(), envContext.getSystemId(), tableTitle);
     }
 
     private EnvironmentContext getEnvironmentContext(@Nonnull String projectName, @Nullable String envName,

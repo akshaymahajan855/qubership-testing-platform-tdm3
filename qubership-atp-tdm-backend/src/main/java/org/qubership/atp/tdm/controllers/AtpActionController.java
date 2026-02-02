@@ -18,10 +18,8 @@ package org.qubership.atp.tdm.controllers;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.qubership.atp.integration.configuration.configuration.AuditAction;
 import org.qubership.atp.tdm.model.rest.ResponseMessage;
-import org.qubership.atp.tdm.model.rest.ResponseType;
 import org.qubership.atp.tdm.model.rest.requests.RestApiRequest;
 import org.qubership.atp.tdm.service.AtpActionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +52,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow occupy records under ATP_USER.
+     * Allow to occupy records under ATP_USER.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -69,7 +67,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow occupy records under ATP_USER.
+     * Allow to occupy records under ATP_USER.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -84,7 +82,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow release occupied records.
+     * Allow to release occupied records.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -99,7 +97,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow release occupied records.
+     * Allow to release occupied records.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -132,7 +130,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow return values from multiple columns.
+     * Allow to return values from multiple columns.
      *
      * @param request Request with looking data criteria.
      * @return Object with multiple columns value.
@@ -186,18 +184,6 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     @AuditAction(auditAction = "ATP Action. Returns Table name based on {{#request.titleTable}}.")
     @PostMapping(value = "/resolve-table")
     public ResponseMessage resolveTableName(@RequestBody RestApiRequest request) {
-        if (StringUtils.isBlank(request.getProjectName())) {
-            return new ResponseMessage(ResponseType.ERROR, "Project name is missed");
-        }
-        if (StringUtils.isBlank(request.getEnvName())) {
-            return new ResponseMessage(ResponseType.ERROR, "Environment name is missed");
-        }
-        if (StringUtils.isBlank(request.getSystemName())) {
-            return new ResponseMessage(ResponseType.ERROR, "System name is missed");
-        }
-        if (StringUtils.isBlank(request.getTitleTable())) {
-            return new ResponseMessage(ResponseType.ERROR, "Title table name is missed");
-        }
         return service.resolveTableName(request.getProjectName(), request.getEnvName(),
                 request.getSystemName(), request.getTitleTable());
     }
