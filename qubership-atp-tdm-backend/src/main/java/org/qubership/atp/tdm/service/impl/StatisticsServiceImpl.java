@@ -1024,4 +1024,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         schedulerService.deleteJob(new JobKey(String.valueOf(systemId), SCHEDULE_AVAILABLE_DATA_GROUP));
         log.info("The statistics available data schedule successfully deleted.");
     }
+
+    @Override
+    public void updateOccupiedStatisticsTableTitle(@Nonnull String tableName,
+                                                   @Nullable String tableTitle) {
+        log.info("Updating occupied statistics table title. Table: [{}], title: [{}]",
+                tableName, tableTitle);
+        occupyStatisticRepository.changeOccupiedTestDataTitle(tableName, tableTitle);
+    }
+
 }

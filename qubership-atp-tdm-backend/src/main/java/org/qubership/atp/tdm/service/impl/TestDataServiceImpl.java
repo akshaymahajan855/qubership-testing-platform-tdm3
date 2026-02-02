@@ -741,7 +741,12 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public boolean changeTestDataTitle(@Nonnull String tableName, @Nullable String tableTitle) {
-        return testDataTableRepository.changeTestDataTitle(tableName, tableTitle);
+        boolean updated =
+                testDataTableRepository.changeTestDataTitle(tableName, tableTitle);
+        if (updated && tableTitle!=null ) {
+                statisticsService.updateOccupiedStatisticsTableTitle(tableName, tableTitle);
+        }
+        return updated;
     }
 
     @Override
