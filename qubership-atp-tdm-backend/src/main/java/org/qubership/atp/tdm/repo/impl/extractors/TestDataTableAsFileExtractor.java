@@ -22,7 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
 import org.qubership.atp.tdm.exceptions.internal.TdmGetTableException;
 import org.qubership.atp.tdm.model.ExportFileType;
 import org.qubership.atp.tdm.model.table.TestDataType;
@@ -39,9 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 public class TestDataTableAsFileExtractor implements ResultSetExtractor<File> {
 
     private final ColumnService columnService;
-
-    private String tableName;
-    private ExportFileType fileType;
+    private final String tableName;
+    private final ExportFileType fileType;
 
     TestDataTableAsFileExtractor(@Nonnull ColumnService columnService, @Nonnull String tableName,
                                  @Nonnull ExportFileType fileType) {
@@ -51,7 +49,7 @@ public class TestDataTableAsFileExtractor implements ResultSetExtractor<File> {
     }
 
     @Override
-    public File extractData(@NotNull ResultSet resultSet) throws SQLException, DataAccessException {
+    public File extractData(@Nonnull ResultSet resultSet) throws SQLException, DataAccessException {
         List<TestDataTableColumn> columns = columnService.extractColumns(this.tableName, TestDataType.ALL, resultSet);
         try {
             if (ExportFileType.EXCEL.equals(this.fileType)) {

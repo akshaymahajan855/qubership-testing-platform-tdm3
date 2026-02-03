@@ -28,7 +28,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.qubership.atp.common.lock.LockManager;
 import org.qubership.atp.tdm.env.configurator.model.Connection;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
@@ -390,7 +389,7 @@ public class ColumnServiceImpl implements ColumnService {
      * @param tableName TDM table name.
      */
     @Override
-    public void deleteByTableName(@NotNull String tableName) {
+    public void deleteByTableName(@Nonnull String tableName) {
         log.info("Delete rows by table name {} in ColumnRepository", tableName);
         columnRepository.deleteByIdentity_TableName(tableName);
         log.info("Rows was deleted by table name {}.", tableName);
