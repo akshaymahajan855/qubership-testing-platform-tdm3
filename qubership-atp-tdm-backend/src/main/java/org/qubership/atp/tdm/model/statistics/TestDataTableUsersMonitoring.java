@@ -18,7 +18,7 @@ package org.qubership.atp.tdm.model.statistics;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
 
 import jakarta.persistence.Column;
@@ -50,7 +50,6 @@ public class TestDataTableUsersMonitoring implements ScheduleConfig {
     private boolean csvReport;
     @Column(name = "days_count")
     private int daysCount;
-
 
     @Override
     public UUID getId() {

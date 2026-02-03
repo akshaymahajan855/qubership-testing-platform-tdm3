@@ -16,38 +16,36 @@
 
 package org.qubership.atp.tdm.service.impl;
 
-import org.qubership.atp.tdm.AbstractTest;
-import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
-import org.qubership.atp.tdm.service.SchedulerService;
-import lombok.Data;
-import org.apache.commons.lang.StringUtils;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
-import org.quartz.SchedulerException;
+import org.qubership.atp.tdm.AbstractTest;
+import org.qubership.atp.tdm.service.SchedulerService;
+import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.UUID;
+import lombok.Data;
 
 public class SchedulerServiceTest extends AbstractTest {
 
-    private static final String SCHED_GROUP = "SchedulerService";
+    private static final String SCHEDULE_GROUP = "SchedulerService";
 
     @Autowired
     private SchedulerService schedulerService;
 
     @Test
-    public void schedulerService_reschedule_scheduleRescheduled() throws SchedulerException {
+    public void schedulerService_reschedule_scheduleRescheduled() {
         UUID configId = UUID.randomUUID();
-        FakeScheduleConfig config = new FakeScheduleConfig(configId, "0 0/1 * * * ?", true);
+        StubScheduleConfig config = new StubScheduleConfig(configId, "0 0/1 * * * ?", true);
         JobDetail job = JobBuilder.newJob(Job.class)
-                .withIdentity(configId.toString(), SCHED_GROUP)
+                .withIdentity(configId.toString(), SCHEDULE_GROUP)
                 .build();
-        schedulerService.reschedule(job, config, SCHED_GROUP);
+        schedulerService.reschedule(job, config, SCHEDULE_GROUP);
 
         Assertions.assertTrue(schedulerService.checkExists(job.getKey()));
     }
@@ -55,16 +53,16 @@ public class SchedulerServiceTest extends AbstractTest {
     @Test
     public void schedulerService_rescheduleDisabledJob_scheduleRescheduled() {
         UUID configId = UUID.randomUUID();
-        FakeScheduleConfig config = new FakeScheduleConfig(configId, "0 0/1 * * * ?", true);
+        StubScheduleConfig config = new StubScheduleConfig(configId, "0 0/1 * * * ?", true);
         JobDetail job = JobBuilder.newJob(Job.class)
-                .withIdentity(configId.toString(), SCHED_GROUP)
+                .withIdentity(configId.toString(), SCHEDULE_GROUP)
                 .build();
-        schedulerService.reschedule(job, config, SCHED_GROUP);
+        schedulerService.reschedule(job, config, SCHEDULE_GROUP);
 
         Assertions.assertTrue(schedulerService.checkExists(job.getKey()));
 
         config.setEnabled(false);
-        schedulerService.reschedule(job, config, SCHED_GROUP);
+        schedulerService.reschedule(job, config, SCHEDULE_GROUP);
 
         Assertions.assertFalse(schedulerService.checkExists(job.getKey()));
     }
@@ -72,26 +70,22 @@ public class SchedulerServiceTest extends AbstractTest {
     @Test
     public void schedulerService_deleteJob_jobDeleted() throws Exception {
         UUID configId = UUID.randomUUID();
-        ScheduleConfig config = new FakeScheduleConfig(configId, "0 0/1 * * * ?", true);
+        ScheduleConfig config = new StubScheduleConfig(configId, "0 0/1 * * * ?", true);
         JobDetail job = JobBuilder.newJob(Job.class)
-                .withIdentity(configId.toString(), SCHED_GROUP)
+                .withIdentity(configId.toString(), SCHEDULE_GROUP)
                 .build();
-        schedulerService.reschedule(job, config, SCHED_GROUP);
+        schedulerService.reschedule(job, config, SCHEDULE_GROUP);
         Thread.sleep(3000);
         Assertions.assertTrue(schedulerService.checkExists(job.getKey()));
-
-//        schedulerService.deleteJob(job.getKey());
-//        Thread.sleep(5000);
-//        Assertions.assertFalse(schedulerService.checkExists(job.getKey()));
     }
 
     @Data
-    private class FakeScheduleConfig implements ScheduleConfig {
+    private class StubScheduleConfig implements ScheduleConfig {
         private UUID id;
         private String schedule;
         private boolean enabled;
 
-        public FakeScheduleConfig(UUID id, String schedule, boolean enabled) {
+        public StubScheduleConfig(UUID id, String schedule, boolean enabled) {
             this.id = id;
             this.schedule = schedule;
             this.enabled = enabled;
