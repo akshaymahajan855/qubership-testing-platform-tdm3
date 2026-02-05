@@ -141,8 +141,8 @@ public class TestDataQueries {
                     + "ORDER BY table_name";
 
     public static final String CHANGE_OCCUPIED_TEST_DATA_TITLE =
-            "UPDATE test_data_occupy_statistic SET table_title = :table_title " +
-                    "WHERE table_name = :table_name";
+            "UPDATE test_data_occupy_statistic SET table_title = :table_title "
+                    + "WHERE table_name = :table_name";
 
     public static final String GET_OCCUPIED_STATISTIC_BY_PROJECT_AND_SYSTEM =
             "SELECT DISTINCT ON(table_name) "
