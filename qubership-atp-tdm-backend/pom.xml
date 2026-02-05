@@ -3,7 +3,7 @@
     <parent>
         <artifactId>qubership-atp-tdm-parent-db</artifactId>
         <groupId>org.qubership.atp.tdm3</groupId>
-        <version>1.0.7-SNAPSHOT</version>
+        <version>1.0.7</version>
         <relativePath>../parent/qubership-atp-tdm-parent-db/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
