@@ -18,7 +18,7 @@ package org.qubership.atp.tdm.model.refresh;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
 
 import jakarta.persistence.Column;
@@ -47,7 +47,6 @@ public class TestDataRefreshConfig implements ScheduleConfig {
 
     @Transient
     private Integer queryTimout;
-
 
     public boolean isScheduled() {
         return enabled && StringUtils.isNotEmpty(schedule);

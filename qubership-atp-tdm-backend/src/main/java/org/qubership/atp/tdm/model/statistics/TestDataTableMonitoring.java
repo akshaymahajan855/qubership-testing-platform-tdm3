@@ -18,7 +18,7 @@ package org.qubership.atp.tdm.model.statistics;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
 
@@ -55,7 +55,6 @@ public class TestDataTableMonitoring implements ScheduleConfig {
     @Transient
     @JsonIgnore
     private String scheduled;
-
 
     @Override
     public UUID getId() {

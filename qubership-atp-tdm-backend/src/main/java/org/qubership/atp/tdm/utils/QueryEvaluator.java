@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.tdm.exceptions.internal.TdmEvaluateQueryException;
 import org.qubership.atp.tdm.model.table.TestDataTable;
 import org.qubership.atp.tdm.repo.impl.extractors.TestDataExtractorProvider;
@@ -52,11 +52,7 @@ public class QueryEvaluator {
      * Evaluate query.
      */
     public String evaluate(@Nonnull String tableName, @Nonnull String query) {
-        if (query.contains("${")) {
-            return evaluateQuery(tableName, query);
-        }
-
-        return query;
+        return query.contains("${") ? evaluateQuery(tableName, query) : query;
     }
 
     private String evaluateQuery(@Nonnull String tableName, @Nonnull String inputQuery) {

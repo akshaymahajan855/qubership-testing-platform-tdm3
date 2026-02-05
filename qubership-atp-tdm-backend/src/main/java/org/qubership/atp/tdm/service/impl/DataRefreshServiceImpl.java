@@ -32,8 +32,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.quartz.CronExpression;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
@@ -127,11 +127,12 @@ public class DataRefreshServiceImpl implements DataRefreshService {
     }
 
     @Override
-    public TestDataRefreshConfig saveRefreshConfig(@Nonnull String tableName, @Nonnull Integer queryTimeout,
-                                                   @Nonnull TestDataRefreshConfig config) throws Exception {
+    public TestDataRefreshConfig saveRefreshConfig(@Nonnull String tableName,
+                                                   @Nonnull Integer queryTimeout,
+                                                   @Nonnull TestDataRefreshConfig config) {
         Preconditions.checkArgument(StringUtils.isNotEmpty(tableName), "Table Name is null");
         Preconditions.checkArgument(checkSqlAvailability(tableName),
-                "Environment ins't set up properly to execute SQL queries");
+                "Environment isn't set up properly to execute SQL queries");
         Preconditions.checkArgument(queryTimeout > 0 && queryTimeout <= maxQueryTimeout,
                 "The timeout is not within the allowed range.\nRange: [1:3600]");
         ValidateCronExpression.validate(config.getSchedule());
@@ -234,7 +235,7 @@ public class DataRefreshServiceImpl implements DataRefreshService {
     @Override
     public List<RefreshResults> runRefresh(@Nonnull String tableName,
                                            @Nonnull Integer queryTimeout,
-                                           @Nonnull boolean allEnv,
+                                           boolean allEnv,
                                            boolean saveOccupiedData) throws Exception {
         List<RefreshResults> refreshResultsList = new ArrayList<>();
         List<TestDataTableCatalog> catalogList = getTableWithSameTitleAndQuery(tableName, allEnv);
@@ -356,7 +357,7 @@ public class DataRefreshServiceImpl implements DataRefreshService {
         log.info("Processing [{}] refresh schedule request(s)", configs.size());
         for (TestDataRefreshConfig config : configs) {
             UUID configId = config.getId();
-            log.info("Scheduling refresh config: {}", config.toString());
+            log.info("Scheduling refresh config: {}", config);
             JobDetail job = JobBuilder.newJob(DataRefreshJob.class)
                     .withIdentity(configId.toString(), SCHED_GROUP)
                     .build();

@@ -19,7 +19,6 @@ package org.qubership.atp.tdm.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jetbrains.annotations.NotNull;
 import org.qubership.atp.tdm.model.TestDataTableCatalog;
 import org.qubership.atp.tdm.model.table.TestDataFlagsTable;
 import org.qubership.atp.tdm.repo.CatalogRepository;
@@ -57,8 +56,8 @@ public class TestDataFlagsServiceImpl implements TestDataFlagsService {
      * @param validateUnoccupiedResources Flag for unoccupied objects
      */
     @Override
-    public void setValidateUnoccupiedResourcesFlag(@NotNull String tableName,
-                                                   @NotNull Boolean validateUnoccupiedResources,
+    public void setValidateUnoccupiedResourcesFlag(@Nonnull String tableName,
+                                                   @Nonnull Boolean validateUnoccupiedResources,
                                                    @Nonnull Boolean isAll) {
         if (isAll) {
             bulkSetValidateUnoccupiedResourcesFlag(tableName, validateUnoccupiedResources);
@@ -69,24 +68,22 @@ public class TestDataFlagsServiceImpl implements TestDataFlagsService {
         }
     }
 
-    private void bulkSetValidateUnoccupiedResourcesFlag(@NotNull String tableName,
-                                                        @NotNull Boolean validateUnoccupiedResources) {
+    private void bulkSetValidateUnoccupiedResourcesFlag(@Nonnull String tableName,
+                                                        @Nonnull Boolean validateUnoccupiedResources) {
         log.info("Setting bulk Validate Unoccupied Resources Flag.");
         TestDataTableCatalog testDataCatalog = catalogRepository.findByTableName(tableName);
         List<TestDataFlagsTable> flagsTableList = catalogRepository.findAllByProjectIdAndTableTitle(
                 testDataCatalog.getProjectId(),
                 testDataCatalog.getTableTitle()).stream().map(catalog -> new TestDataFlagsTable(catalog.getTableName(),
                 validateUnoccupiedResources)).collect(Collectors.toList());
-        flagsTableList.forEach(testDataFlagsTable -> {
-            testDataColumnFlagsRepository.save(testDataFlagsTable);
-            log.info("Flag {} has been installed for table: {}",
-                    validateUnoccupiedResources,
-                    testDataFlagsTable.getTableName());
+        flagsTableList.forEach(flagsTable -> {
+            testDataColumnFlagsRepository.save(flagsTable);
+            log.info("Flag {} has been installed for table: {}", validateUnoccupiedResources, flagsTable.getTableName());
         });
     }
 
     @Override
-    public TestDataFlagsTable getValidateUnoccupiedResourcesFlag(@NotNull String tableName) {
+    public TestDataFlagsTable getValidateUnoccupiedResourcesFlag(@Nonnull String tableName) {
         return testDataColumnFlagsRepository.findRowByTableName(tableName);
     }
 

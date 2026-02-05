@@ -69,9 +69,12 @@ public interface AtpActionService {
                                         @Nullable String systemName, @Nonnull String tableTitle);
 
     List<ResponseMessage> runCleanupForTable(@Nonnull String projectName, @Nullable String envName,
-                                        @Nullable String systemName, @Nonnull String tableTitle);
+                                             @Nullable String systemName, @Nonnull String tableTitle);
 
     List<ResponseMessage> getMultipleColumnTestData(@Nonnull String projectName, @Nullable String envName,
                                                     @Nullable String systemName, @Nonnull String tableTitle,
                                                     @Nonnull List<GetRowRequest> multipleColumnRowRequest);
+
+    ResponseMessage resolveTableName(@Nonnull String projectName, @Nonnull String envName,
+                                     @Nonnull String systemName, @Nonnull String titleTable);
 }

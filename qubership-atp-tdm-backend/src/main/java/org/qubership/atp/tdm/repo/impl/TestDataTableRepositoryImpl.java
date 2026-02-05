@@ -19,8 +19,8 @@ package org.qubership.atp.tdm.repo.impl;
 import static java.lang.String.format;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.hibernate.boot.model.naming.IllegalIdentifierException;
-import org.jetbrains.annotations.NotNull;
 import org.owasp.esapi.Encoder;
 import org.owasp.esapi.codecs.OracleCodec;
 import org.owasp.esapi.reference.DefaultEncoder;
@@ -142,7 +141,8 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
     private final LockManager lockManager;
     private final Encoder esapiEncoder = DefaultEncoder.getInstance();
     private final OracleCodec oracleCodec = new OracleCodec();
-    private ConcurrentHashMap<String, String> cacheLastUsageTable = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> cacheLastUsageTable = new ConcurrentHashMap<>();
+
     @Value("${alter.column.mode}")
     private String alterColumnMode;
     @Value("${excel.import.directory}")
@@ -202,7 +202,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
 
     private void writeFileOnDiscSpace(MultipartFile sourceFile, File destinationFile) {
         log.debug("Writing file:{} to: {}", sourceFile.getName(), destinationFile.getName());
-        try (OutputStream fileOutputStream = new FileOutputStream(destinationFile)) {
+        try (OutputStream fileOutputStream = Files.newOutputStream(destinationFile.toPath())) {
             fileOutputStream.write(sourceFile.getBytes());
             log.debug("File writing success");
             sourceFile.getInputStream().close();
@@ -286,7 +286,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
             conditionColumnName = indexColumnMatcher.group(1);
         }
 
-        if (!conditionColumnNamePattern.equals("")) {
+        if (!conditionColumnNamePattern.isEmpty()) {
             List<String> queryColumnNames = TestDataUtils.getColumnsNamesFromQuery(query);
             List<String> existingColumns = getTableColumns(tableName);
             for (String queryColumnName : queryColumnNames) {
@@ -605,7 +605,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         DataUtils.checkTableName(tableName);
         List<String> columns = new ArrayList<>(rows.stream()
                 .findFirst()
-                .orElseThrow(() -> new TdmInsertDataException()).keySet());
+                .orElseThrow(TdmInsertDataException::new).keySet());
         saveTestData(tableName, exists, columns, rows, skipSchemaUpdate);
     }
 
@@ -663,7 +663,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
     }
 
     @Override
-    public int getCountRows(@NotNull String tableName) {
+    public int getCountRows(@Nonnull String tableName) {
         DataUtils.checkTableName(tableName);
         String sanitizedTableName = esapiEncoder.encodeForSQL(oracleCodec, tableName);
         return jdbcTemplate.queryForObject(format(TestDataQueries.GET_COUNT_ROWS, sanitizedTableName), Integer.class);
@@ -869,11 +869,6 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
                         }
                         return null;
                     });
-                    /*jdbcTemplate.execute(query, (PreparedStatementCallback<Boolean>) ps -> {
-                        ps.setString(1, sanitizedTableName);
-                        ps.setString(2, sanitizedColumnName);
-                        return ps.execute();
-                    });*/
                     jdbcTemplate.execute(format(query, sanitizedTableName, sanitizedColumnName));
                 });
             }
@@ -897,7 +892,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         List<String> currentColumns = getTableColumns(tableName);
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
         transactionTemplate.execute(new TransactionCallbackWithoutResult() {
-            public void doInTransactionWithoutResult(@NotNull TransactionStatus status) {
+            public void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
                 jdbcTemplate.execute(TestDataQueries.BEGIN_WORK);
                 jdbcTemplate.execute(format(TestDataQueries.LOCK_TABLE, tableName));
                 String tmpTableName = tableName + "_";
@@ -985,7 +980,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
     }
 
     @Override
-    public List<String> getAllColumnNamesBySystemId(@NotNull UUID systemId) {
+    public List<String> getAllColumnNamesBySystemId(@Nonnull UUID systemId) {
         return jdbcTemplate.queryForList(TestDataQueries.GET_ALL_COLUMN_NAMES_BY_SYSTEM_ID, String.class, systemId);
     }
 }

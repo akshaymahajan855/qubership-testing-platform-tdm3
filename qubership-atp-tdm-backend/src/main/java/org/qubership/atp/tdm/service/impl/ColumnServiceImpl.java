@@ -27,8 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.common.lock.LockManager;
 import org.qubership.atp.tdm.env.configurator.model.Connection;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
@@ -203,20 +202,15 @@ public class ColumnServiceImpl implements ColumnService {
         List<Connection> connections = environmentsService.getConnectionsSystemById(null, systemId);
         Map<String, String> parameters = TestDataUtils.getConnection(connections, CONNECTION_NAME).getParameters();
 
-        String serverUrl;
-        if (externalUrl) {
-            serverUrl = getHttpUrlParamValue(parameters, PARAMETER_NAME_EXTERNAL_URL);
-        } else {
-            serverUrl = getHttpUrlParamValue(parameters, PARAMETER_NAME_URL);
-        }
+        String serverUrl = getHttpUrlParamValue(parameters,
+                externalUrl ? PARAMETER_NAME_EXTERNAL_URL : PARAMETER_NAME_URL);
         log.info("Got link for project [{}], system [{}] with endpoint [{}]", projectId, systemId, endpoint);
         return serverUrl + "/" + endpoint;
     }
 
     private String getHttpUrlParamValue(Map<String, String> parameters, String httpUrlParam) {
         if (!parameters.containsKey(httpUrlParam)) {
-            throw new IllegalArgumentException(String.format("Parameter [%s] was not found.",
-                    httpUrlParam));
+            throw new IllegalArgumentException(String.format("Parameter [%s] was not found.", httpUrlParam));
         }
         return parameters.get(httpUrlParam);
     }
@@ -257,10 +251,7 @@ public class ColumnServiceImpl implements ColumnService {
                     columnRepository.findAllByIdentityTableName(tableName);
             columns.forEach(column -> {
                 String endpoint = extractEndpointFromFullUrl(column.getColumnLink());
-                boolean pickUpFullLinkFromTableCell = false;
-                if (endpoint.equals(StringUtils.EMPTY)) {
-                    pickUpFullLinkFromTableCell = true;
-                }
+                boolean pickUpFullLinkFromTableCell = endpoint.equals(StringUtils.EMPTY);
                 String columnName = column.getIdentity().getColumnName();
                 setupLinkForOneTable(projectId, systemId, tableName, columnName, endpoint,
                         column.isBulkLink(), pickUpFullLinkFromTableCell);
@@ -291,10 +282,7 @@ public class ColumnServiceImpl implements ColumnService {
             columns.forEach(column -> {
                 if (column.isBulkLink()) {
                     String endpoint = extractEndpointFromFullUrl(column.getColumnLink());
-                    boolean pickUpFullLinkFromTableCell = false;
-                    if (endpoint.equals(StringUtils.EMPTY)) {
-                        pickUpFullLinkFromTableCell = true;
-                    }
+                    boolean pickUpFullLinkFromTableCell = endpoint.equals(StringUtils.EMPTY);
                     String columnName = column.getIdentity().getColumnName();
                     setupLinkForOneTable(projectId, systemId, tableName, columnName,
                             endpoint, true, pickUpFullLinkFromTableCell);
@@ -401,7 +389,7 @@ public class ColumnServiceImpl implements ColumnService {
      * @param tableName TDM table name.
      */
     @Override
-    public void deleteByTableName(@NotNull String tableName) {
+    public void deleteByTableName(@Nonnull String tableName) {
         log.info("Delete rows by table name {} in ColumnRepository", tableName);
         columnRepository.deleteByIdentity_TableName(tableName);
         log.info("Rows was deleted by table name {}.", tableName);

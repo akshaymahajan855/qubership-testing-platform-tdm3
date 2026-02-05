@@ -18,7 +18,7 @@ package org.qubership.atp.tdm.model.cleanup;
 
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.qubership.atp.tdm.utils.scheduler.ScheduleConfig;
 

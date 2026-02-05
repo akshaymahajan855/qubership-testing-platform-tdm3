@@ -24,7 +24,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 import org.qubership.atp.tdm.env.configurator.model.LazyEnvironment;
 import org.qubership.atp.tdm.env.configurator.model.LazyProject;
 import org.qubership.atp.tdm.env.configurator.model.LazySystem;
@@ -77,9 +77,9 @@ public class AtpActionServiceImpl implements AtpActionService {
     }
 
     @Override
-    public List<ResponseMessage> getMultipleColumnTestData(@NotNull String projectName, @Nullable String envName,
-                                                           @Nullable String systemName, @NotNull String tableTitle,
-                                                           @NotNull List<GetRowRequest> multipleColumnRowRequest) {
+    public List<ResponseMessage> getMultipleColumnTestData(@Nonnull String projectName, @Nullable String envName,
+                                                           @Nullable String systemName, @Nonnull String tableTitle,
+                                                           @Nonnull List<GetRowRequest> multipleColumnRowRequest) {
         log.info("ATP Action. Getting multiple column test data. Table Title: {}", tableTitle);
         EnvironmentContext environmentContext = getEnvironmentContext(projectName, envName, systemName);
         String link = this.formResultLink(environmentContext.getProjectId(), environmentContext.getEnvId(),
@@ -141,7 +141,7 @@ public class AtpActionServiceImpl implements AtpActionService {
     @Override
     public List<ResponseMessage> releaseFullTestData(@Nonnull String projectName, @Nullable String envName,
                                                      @Nullable String systemName, @Nonnull String tableTitle) {
-        log.info("ATP Action. Release of test data. Table Title: {}", tableTitle);
+        log.info("ATP Action. Release of full test data. Table Title: {}", tableTitle);
         EnvironmentContext environmentContext = getEnvironmentContext(projectName, envName, systemName);
         return repository.releaseFullTestData(environmentContext.getProjectId(), environmentContext.getSystemId(),
                 tableTitle);
@@ -215,6 +215,31 @@ public class AtpActionServiceImpl implements AtpActionService {
                 environmentContext.getSystemId(), tableTitle);
     }
 
+    @Override
+    public ResponseMessage resolveTableName(@Nonnull String projectName, @Nonnull String envName,
+                                            @Nonnull String systemName, @Nonnull String tableTitle) {
+
+        if (StringUtils.isBlank(projectName)) {
+            return new ResponseMessage(ResponseType.ERROR, "Project name is missed");
+        }
+        if (StringUtils.isBlank(envName)) {
+            return new ResponseMessage(ResponseType.ERROR, "Environment name is missed");
+        }
+        if (StringUtils.isBlank(systemName)) {
+            return new ResponseMessage(ResponseType.ERROR, "System name is missed");
+        }
+        if (StringUtils.isBlank(tableTitle)) {
+            return new ResponseMessage(ResponseType.ERROR, "Title table name is missed");
+        }
+        log.info("ATP Action. Getting table name based on Table Title: {}", tableTitle);
+        EnvironmentContext envContext = getEnvironmentContext(projectName, envName, systemName);
+        if (envContext.getSystemId() == null) {
+            return new ResponseMessage(ResponseType.ERROR,
+                    String.format("System was not resolved for env=\"%s\", system=\"%s\".", envName, systemName));
+        }
+        return repository.resolveTableName(envContext.getProjectId(), envContext.getSystemId(), tableTitle);
+    }
+
     private EnvironmentContext getEnvironmentContext(@Nonnull String projectName, @Nullable String envName,
                                                      @Nullable String systemName) {
         log.info("Loading data from the environments tool. Project: [{}], Env: [{}], System: [{}]",
@@ -241,8 +266,7 @@ public class AtpActionServiceImpl implements AtpActionService {
                 log.info("Env: [{}]", envName);
             }
 
-            LazyEnvironment lazyEnvironment = environmentsService.getLazyEnvironmentByName(projectId,
-                    envName);
+            LazyEnvironment lazyEnvironment = environmentsService.getLazyEnvironmentByName(projectId, envName);
 
             envId = lazyEnvironment.getId();
             LazySystem lazySystemByName =
@@ -262,7 +286,7 @@ public class AtpActionServiceImpl implements AtpActionService {
     }
 
     /**
-     * Get URL when Interngal Gateway is enabled.
+     * Get URL when Internal Gateway is enabled.
      */
 
     @PostConstruct

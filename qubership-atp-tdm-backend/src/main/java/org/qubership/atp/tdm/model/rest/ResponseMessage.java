@@ -16,7 +16,7 @@
 
 package org.qubership.atp.tdm.model.rest;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

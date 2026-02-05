@@ -52,7 +52,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow occupy records under ATP_USER.
+     * Allow to occupy records under ATP_USER.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -67,7 +67,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow occupy records under ATP_USER.
+     * Allow to occupy records under ATP_USER.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -82,7 +82,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow release occupied records.
+     * Allow to release occupied records.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -97,7 +97,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow release occupied records.
+     * Allow to release occupied records.
      *
      * @param request - RestApiRequest
      * @return List of ResponseMessages
@@ -130,7 +130,7 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     }
 
     /**
-     * Allow return values from multiple columns.
+     * Allow to return values from multiple columns.
      *
      * @param request Request with looking data criteria.
      * @return Object with multiple columns value.
@@ -178,5 +178,13 @@ public class AtpActionController /* implements AtpActionControllerApi */ {
     public List<ResponseMessage> runCleanupForTable(@RequestBody RestApiRequest request) {
         return service.runCleanupForTable(request.getProjectName(), request.getEnvName(), request.getSystemName(),
                 request.getTitleTable());
+    }
+
+    @Operation(description = "ATP Action. Resolves Table Name based on environment and table title.")
+    @AuditAction(auditAction = "ATP Action. Returns Table name based on {{#request.titleTable}}.")
+    @PostMapping(value = "/resolve-table")
+    public ResponseMessage resolveTableName(@RequestBody RestApiRequest request) {
+        return service.resolveTableName(request.getProjectName(), request.getEnvName(),
+                request.getSystemName(), request.getTitleTable());
     }
 }
