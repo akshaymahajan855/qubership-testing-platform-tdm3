@@ -42,6 +42,12 @@ public interface OccupyStatisticRepository extends JpaRepository<TestDataOccupyS
 
     @Transactional
     @Modifying
+    @Query(value = TestDataQueries.CHANGE_OCCUPIED_TEST_DATA_TITLE, nativeQuery = true)
+    void changeOccupiedTestDataTitle(@Param("table_name") String tableName,
+                                     @Param("table_title") String tableTitle);
+
+    @Transactional
+    @Modifying
     @Query(value = TestDataQueries.DELETE_OCCUPIED_STATISTIC, nativeQuery = true)
     void deleteAllByRowId(@Param("rowIds") List<UUID> rowIds);
 

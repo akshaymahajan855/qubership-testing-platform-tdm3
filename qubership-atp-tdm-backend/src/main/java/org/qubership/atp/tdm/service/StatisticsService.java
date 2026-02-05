@@ -104,4 +104,6 @@ public interface StatisticsService {
     void saveAvailableDataMonitoringConfig(@Nonnull TestAvailableDataMonitoring monitoringConfig) throws Exception;
 
     void deleteAvailableDataMonitoringConfig(@Nonnull UUID systemId, @Nonnull UUID environmentId);
+
+    void updateOccupiedStatisticsTableTitle(@Nonnull String tableName, @Nonnull String tableTitle);
 }
