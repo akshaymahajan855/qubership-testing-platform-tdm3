@@ -47,8 +47,7 @@ public class YamlEnvironment {
     public void setYamlSystems(List<YamlSystem> yamlSystems) {
         this.yamlSystems = yamlSystems;
         yamlSystems.stream()
-                .forEach(yamlSystem -> yamlSystem.setId(
-                        UUID.nameUUIDFromBytes(String.format("%s/%s", this.name, yamlSystem.getName()).getBytes())));
+                .forEach(yamlSystem -> yamlSystem.setId(composeSystemId(this.name, yamlSystem.getName())));
         setConnectionId();
     }
 
@@ -57,51 +56,41 @@ public class YamlEnvironment {
     }
 
     private void setConnectionId() {
-        yamlSystems.forEach(yamlSystem -> {
-            yamlSystem.getConnections().forEach(yamlConnection -> {
-                yamlConnection.setId(
-                        UUID.nameUUIDFromBytes(
-                                String.format(
-                                                "%s/%s/%s", this.name, yamlSystem.getName(), yamlConnection.getName()
-                                        )
-                                        .getBytes()
-                        )
-                );
-            });
-        });
+        yamlSystems.forEach(
+                yamlSystem -> yamlSystem.getConnections().forEach(
+                        yamlConnection -> yamlConnection.setId(
+                                composeConnectionId(this.name, yamlSystem.getName(), yamlConnection.getName()))));
     }
 
     public void setYamlSystemsWithCredentials(List<YamlSystem> yamlSystems) {
         yamlSystems.stream()
-                .forEach(yamlSystem -> yamlSystem.setId(
-                        UUID.nameUUIDFromBytes(String.format("%s/%s", this.name, yamlSystem.getName()).getBytes())));
+                .forEach(yamlSystem -> yamlSystem.setId(composeSystemId(this.name, yamlSystem.getName())));
 
-        yamlSystems.forEach(yamlSystem -> {
-            yamlSystem.getConnections().forEach(yamlConnection -> {
-                yamlConnection.setId(
-                        UUID.nameUUIDFromBytes(
-                                String.format(
-                                                "%s/%s/%s", this.name, yamlSystem.getName(), yamlConnection.getName()
-                                        )
-                                        .getBytes()
-                        )
-                );
-            });
-        });
+        yamlSystems.forEach(
+                yamlSystem -> yamlSystem.getConnections().forEach(
+                        yamlConnection -> yamlConnection.setId(
+                                composeConnectionId(this.name, yamlSystem.getName(), yamlConnection.getName()))));
         mergeConnections(yamlSystems);
     }
 
+    private UUID composeSystemId(String envName, String systemName) {
+        return UUID.nameUUIDFromBytes(String.format("%s/%s", envName, systemName).getBytes());
+    }
+
+    private UUID composeConnectionId(String envName, String systemName, String connectionName) {
+        return UUID.nameUUIDFromBytes(String.format("%s/%s/%s", envName, systemName, connectionName).getBytes());
+    }
+
     private void mergeConnections(List<YamlSystem> yamlSystems) {
-        this.yamlSystems.forEach(system -> {
-            system.getConnections().forEach(connection -> {
-                yamlSystems.forEach(yamlSystem -> {
-                    YamlConnection yamlConnection = yamlSystem.getConnectionById(connection.getId());
-                    if (yamlConnection != null) {
-                        connection.getParameters().putAll(yamlConnection.getParameters());
-                    }
-                });
-            });
-        });
+        this.yamlSystems.forEach(
+                system -> system.getConnections().forEach(
+                        connection -> yamlSystems.forEach(
+                                yamlSystem -> {
+            YamlConnection yamlConnection = yamlSystem.getConnectionById(connection.getId());
+            if (yamlConnection != null) {
+                connection.getParameters().putAll(yamlConnection.getParameters());
+            }
+        })));
     }
 
     public List<UUID> getSystemIds() {
