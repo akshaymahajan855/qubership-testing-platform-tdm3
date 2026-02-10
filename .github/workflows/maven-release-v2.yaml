@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build and Publish current SNAPSHOT (dry run)"
-        uses: netcracker/qubership-workflow-hub/actions/maven-release@ac0b35120b940eaa644cdcfee7d4957038998ec2 #v2.0.9
+        uses: netcracker/qubership-workflow-hub/actions/maven-release@8d542a426ce561c7dce745f6b9cee068d1d7e101 #v2.0.10
         with:
           java-version: "21"
           version-type: ${{ github.event.inputs.version-type }}
@@ -96,7 +96,7 @@ jobs:
       - name: "Build and Publish"
         id: build-and-publish
 
-        uses: netcracker/qubership-workflow-hub/actions/maven-release@ac0b35120b940eaa644cdcfee7d4957038998ec2 #v2.0.9
+        uses: netcracker/qubership-workflow-hub/actions/maven-release@8d542a426ce561c7dce745f6b9cee068d1d7e101 #v2.0.10
         with:
           java-version: "21"
           version-type: ${{ github.event.inputs.version-type }}
@@ -168,7 +168,7 @@ jobs:
     steps:
       - name: "Docker Build"
         id: docker_build
-        uses: netcracker/qubership-workflow-hub/actions/docker-action@ac0b35120b940eaa644cdcfee7d4957038998ec2 #v2.0.9
+        uses: netcracker/qubership-workflow-hub/actions/docker-action@8d542a426ce561c7dce745f6b9cee068d1d7e101 #v2.0.10
         with:
           ref: v${{ needs.deploy.outputs.release-version }}
           download-artifact: true
