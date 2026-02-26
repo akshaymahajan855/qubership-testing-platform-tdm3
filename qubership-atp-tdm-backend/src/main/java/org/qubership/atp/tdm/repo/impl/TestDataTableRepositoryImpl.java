@@ -226,7 +226,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         List<Map<String, Object>> rowsBuf = new ArrayList<>();
         AtomicReference<Integer> refRows = new AtomicReference<>(0);
         try {
-            jdbcTemplate.query(esapiEncoder.encodeForSQL(oracleCodec, query), new RowCallbackHandler() {
+            jdbcTemplate.query(query, new RowCallbackHandler() {
                 @Override
                 public void processRow(ResultSet resSet) throws SQLException {
                     if (col.isEmpty()) {
