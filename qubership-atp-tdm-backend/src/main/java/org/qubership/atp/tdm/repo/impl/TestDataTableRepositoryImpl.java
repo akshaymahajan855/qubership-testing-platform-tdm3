@@ -861,15 +861,8 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
                 columnsBuff.forEach(columnName -> {
                     String sanitizedTableName = esapiEncoder.encodeForSQL(oracleCodec, tableName);
                     String sanitizedColumnName = esapiEncoder.encodeForSQL(oracleCodec, columnName);
-                    //TODO remake format of query
-                    jdbcTemplate.execute((ConnectionCallback<Void>) conn -> {
-                        try (PreparedStatement ps = conn.prepareStatement(
-                                String.format(query, sanitizedTableName, sanitizedColumnName))) {
-                            ps.execute();
-                        }
-                        return null;
-                    });
-                    jdbcTemplate.execute(format(query, sanitizedTableName, sanitizedColumnName));
+                    String preparedQuery = String.format(query, sanitizedTableName, sanitizedColumnName);
+                    jdbcTemplate.execute(preparedQuery);
                 });
             }
             log.info("Missing columns successfully added.");
