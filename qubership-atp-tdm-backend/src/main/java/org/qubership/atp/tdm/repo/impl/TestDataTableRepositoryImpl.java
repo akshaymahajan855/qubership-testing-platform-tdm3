@@ -96,7 +96,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.BadSqlGrammarException;
-import org.springframework.jdbc.core.ConnectionCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -228,17 +227,17 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         try {
             jdbcTemplate.query(query, new RowCallbackHandler() {
                 @Override
-                public void processRow(ResultSet resSet) throws SQLException {
+                public void processRow(ResultSet resultSet) throws SQLException {
                     if (col.isEmpty()) {
-                        ResultSetMetaData metData = resSet.getMetaData();
-                        int columnCount = metData.getColumnCount();
+                        ResultSetMetaData metaData = resultSet.getMetaData();
+                        int columnCount = metaData.getColumnCount();
                         for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-                            col.add(metData.getColumnName(columnIndex));
+                            col.add(metaData.getColumnName(columnIndex));
                         }
                     }
                     Map<String, Object> row = new HashMap<>();
                     for (String column : col) {
-                        row.put(column, resSet.getObject(column));
+                        row.put(column, resultSet.getObject(column));
                     }
                     rowsBuf.add(row);
                     if (rowsBuf.size() == batchSize) {
