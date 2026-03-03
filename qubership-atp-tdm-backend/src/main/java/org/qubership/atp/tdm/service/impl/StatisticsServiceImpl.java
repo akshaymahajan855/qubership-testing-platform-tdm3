@@ -933,7 +933,7 @@ public class StatisticsServiceImpl implements StatisticsService {
             List<String> tableNames = catalogRepository
                     .findAllByEnvironmentIdAndSystemId(config.getEnvironmentId(), config.getSystemId())
                     .stream()
-                    .map(table -> table.getTableName().toLowerCase())
+                    .map(table -> table.getTableName().toUpperCase())
                     .collect(Collectors.toList());
             log.trace("Deleting all table by names in tableColumnValuesRepository. Table names: {}", tableNames);
             tableColumnValuesRepository.deleteAllByTableNameIn(tableNames);
