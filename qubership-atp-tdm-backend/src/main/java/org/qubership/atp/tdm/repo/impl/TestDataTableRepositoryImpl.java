@@ -97,7 +97,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -195,7 +194,11 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
             log.error(TdmImportExcelTestDataException.DEFAULT_MESSAGE, e);
             throw new TdmImportExcelTestDataException(e.getMessage());
         } finally {
-            destination.delete();
+            if (destination.delete()) {
+                log.debug("File: {} successfully deleted after import.", destination.getName());
+            } else {
+                log.error("File: {} isn't deleted after import.", destination.getName());
+            }
         }
     }
 
@@ -225,30 +228,27 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         List<Map<String, Object>> rowsBuf = new ArrayList<>();
         AtomicReference<Integer> refRows = new AtomicReference<>(0);
         try {
-            jdbcTemplate.query(query, new RowCallbackHandler() {
-                @Override
-                public void processRow(ResultSet resultSet) throws SQLException {
-                    if (col.isEmpty()) {
-                        ResultSetMetaData metaData = resultSet.getMetaData();
-                        int columnCount = metaData.getColumnCount();
-                        for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
-                            col.add(metaData.getColumnName(columnIndex));
-                        }
+            jdbcTemplate.query(query, resultSet -> {
+                if (col.isEmpty()) {
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+                    for (int columnIndex = 1; columnIndex <= columnCount; columnIndex++) {
+                        col.add(metaData.getColumnName(columnIndex));
                     }
-                    Map<String, Object> row = new HashMap<>();
-                    for (String column : col) {
-                        row.put(column, resultSet.getObject(column));
+                }
+                Map<String, Object> row = new HashMap<>();
+                for (String column : col) {
+                    row.put(column, resultSet.getObject(column));
+                }
+                rowsBuf.add(row);
+                if (rowsBuf.size() == batchSize) {
+                    if (refRows.get() > 0) {
+                        saveTestData(tableName, true, col, rowsBuf, false);
+                    } else {
+                        saveTestData(tableName, exists, col, rowsBuf, true);
                     }
-                    rowsBuf.add(row);
-                    if (rowsBuf.size() == batchSize) {
-                        if (refRows.get() > 0) {
-                            saveTestData(tableName, true, col, rowsBuf, false);
-                        } else {
-                            saveTestData(tableName, exists, col, rowsBuf, true);
-                        }
-                        refRows.updateAndGet(v -> v + batchSize);
-                        rowsBuf.clear();
-                    }
+                    refRows.updateAndGet(v -> v + batchSize);
+                    rowsBuf.clear();
                 }
             });
         } catch (Exception e) {
@@ -352,7 +352,7 @@ public class TestDataTableRepositoryImpl implements TestDataTableRepository {
         }
     }
 
-    private long updateTableRow(@Nonnull String tableName, @Nonnull List<String> columns,
+    private int updateTableRow(@Nonnull String tableName, @Nonnull List<String> columns,
                                 @Nonnull Map<String, Object> row) {
         UpdateQuery updateQuery = new UpdateQuery(esapiEncoder.encodeForSQL(oracleCodec, tableName));
         CustomSql customSql = new CustomSql("\"" + SystemColumns.ROW_ID.getName() + "\"");
